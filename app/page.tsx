@@ -7,7 +7,7 @@ import {
   DocumentTextIcon
 } from '@heroicons/react/24/outline'
 import { Button } from './components/button'
-import { useRouter } from 'next/navigation'
+import { useTransitionRouter } from 'next-view-transitions'
 
 const features = [
   {
@@ -33,7 +33,7 @@ const features = [
 ]
 
 export default function Home() {
-  const router = useRouter()
+  const router = useTransitionRouter()
 
   return (
     <div className="min-h-screen">

@@ -1,7 +1,7 @@
 'use client'
 
 import { useState } from 'react'
-import { useRouter } from 'next/navigation'
+import { useTransitionRouter } from 'next-view-transitions'
 import { createDate, isBefore, isAfter, addYears } from '@setemiojo/utils'
 import { Temporal } from 'temporal-polyfill'
 import { Button } from '../components/button'
@@ -12,7 +12,7 @@ import { MagnifyingGlassIcon } from '@heroicons/react/24/outline'
 import type { DriverLicenseValidationRequest } from '../types'
 
 export default function LookupPage() {
-  const router = useRouter()
+  const router = useTransitionRouter()
   const [isLoading, setIsLoading] = useState(false)
   const [error, setError] = useState<string | null>(null)
   const [fieldErrors, setFieldErrors] = useState<Map<string, string>>(new Map())

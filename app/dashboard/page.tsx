@@ -69,7 +69,7 @@ export default function DashboardPage() {
         setIsRealData(false)
       }
     } catch (error) {
-      console.error('Failed to fetch tickets:', error)
+      // Silently fall back to no data - user will see empty state
     } finally {
       setIsLoading(false)
     }

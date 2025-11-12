@@ -25,10 +25,10 @@ const links = [
 
 export default function NotFound() {
   return (
-    <div className="bg-white dark:bg-gray-900">
+    <div className="bg-white dark:bg-zinc-900">
       <main className="mx-auto w-full max-w-7xl px-6 pb-16 pt-10 sm:pb-24 lg:px-8">
         <div className="mx-auto mt-20 max-w-2xl text-center sm:mt-24">
-          <p className="text-base/8 font-semibold text-blue-600 dark:text-blue-400">
+          <p className="text-base/8 font-semibold text-zinc-600 dark:text-zinc-400">
             404
           </p>
           <h1 className="mt-4 text-balance text-5xl font-semibold tracking-tight text-gray-900 sm:text-6xl dark:text-white">
@@ -46,10 +46,10 @@ export default function NotFound() {
           >
             {links.map((link, linkIdx) => (
               <li key={linkIdx} className="relative flex gap-x-6 py-6">
-                <div className="flex size-10 flex-none items-center justify-center rounded-lg shadow-xs outline-1 outline-gray-900/10 dark:bg-gray-800/50 dark:-outline-offset-1 dark:outline-white/10">
+                <div className="flex size-10 flex-none items-center justify-center rounded-lg shadow-xs outline-1 outline-gray-900/10 dark:bg-zinc-800/50 dark:-outline-offset-1 dark:outline-white/10">
                   <link.icon
                     aria-hidden="true"
-                    className="size-6 text-blue-600 dark:text-blue-400"
+                    className="size-6 text-zinc-600 dark:text-zinc-400"
                   />
                 </div>
                 <div className="flex-auto">
@@ -75,7 +75,7 @@ export default function NotFound() {
           <div className="mt-10 flex justify-center">
             <Link
               href="/"
-              className="text-sm/6 font-semibold text-blue-600 dark:text-blue-400"
+              className="text-sm/6 font-semibold text-zinc-600 dark:text-zinc-400"
             >
               <span aria-hidden="true">&larr;</span> Back to home
             </Link>

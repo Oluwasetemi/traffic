@@ -2,9 +2,11 @@
 
 import { useState } from 'react'
 import { useRouter } from 'next/navigation'
+import { createDate, isBefore, isAfter, addYears } from '@setemiojo/utils'
+import { Temporal } from 'temporal-polyfill'
 import { Button } from '../components/button'
 import { Input } from '../components/input'
-import { Field, Label, Description } from '../components/fieldset'
+import { Field, Label, Description, ErrorMessage } from '../components/fieldset'
 import { Alert, AlertActions, AlertDescription, AlertTitle } from '../components/alert'
 import { MagnifyingGlassIcon } from '@heroicons/react/24/outline'
 import type { DriverLicenseValidationRequest } from '../types'
@@ -13,6 +15,7 @@ export default function LookupPage() {
   const router = useRouter()
   const [isLoading, setIsLoading] = useState(false)
   const [error, setError] = useState<string | null>(null)
+  const [fieldErrors, setFieldErrors] = useState<Map<string, string>>(new Map())
   const [formData, setFormData] = useState({
     driversLicNo: '',
     controlNo: '',
@@ -20,38 +23,110 @@ export default function LookupPage() {
     dateOfBirth: '',
   })
 
+  const validateField = (name: string, value: string): string | null => {
+    switch (name) {
+      case 'driversLicNo':
+        if (!value) return "Driver's license number is required"
+        if (value.length !== 9) return 'Must be exactly 9 digits'
+        return null
+        
+      case 'controlNo':
+        if (!value) return 'Control number is required'
+        if (value.length !== 10) return 'Must be exactly 10 digits'
+        return null
+        
+      case 'origLicIssueDate':
+        if (!value) return 'Original license issue date is required'
+        try {
+          const issueDate = createDate(value)
+          const today = Temporal.Now.plainDateISO()
+          
+          // Cannot be in the future
+          if (isAfter(issueDate, today)) {
+            return 'License issue date cannot be in the future'
+          }
+          
+          // Cannot be more than 100 years ago
+          const hundredYearsAgo = addYears(today, -100)
+          if (isBefore(issueDate, hundredYearsAgo)) {
+            return 'License issue date seems invalid'
+          }
+        } catch (e) {
+          return 'Invalid date format'
+        }
+        return null
+        
+      case 'dateOfBirth':
+        if (!value) return 'Date of birth is required'
+        try {
+          const birthDate = createDate(value)
+          const today = Temporal.Now.plainDateISO()
+          
+          // Cannot be in the future
+          if (isAfter(birthDate, today)) {
+            return 'Date of birth cannot be in the future'
+          }
+          
+          // Must be at least 16 years old (minimum driving age)
+          const sixteenYearsAgo = addYears(today, -16)
+          if (isAfter(birthDate, sixteenYearsAgo)) {
+            return 'Must be at least 16 years old to have a license'
+          }
+          
+          // Cannot be more than 120 years ago
+          const oneHundredTwentyYearsAgo = addYears(today, -120)
+          if (isBefore(birthDate, oneHundredTwentyYearsAgo)) {
+            return 'Date of birth seems invalid'
+          }
+        } catch (e) {
+          return 'Invalid date format'
+        }
+        return null
+        
+      default:
+        return null
+    }
+  }
+
   const handleInputChange = (e: React.ChangeEvent<HTMLInputElement>) => {
     const { name, value } = e.target
 
+    let processedValue = value
     // For numeric fields, only allow digits
     if (name === 'driversLicNo' || name === 'controlNo') {
-      const numericValue = value.replace(/\D/g, '')
-      setFormData((prev) => ({ ...prev, [name]: numericValue }))
-    } else {
-      setFormData((prev) => ({ ...prev, [name]: value }))
+      processedValue = value.replace(/\D/g, '')
     }
 
+    setFormData((prev) => ({ ...prev, [name]: processedValue }))
+
+    // Real-time validation
+    const errorMessage = validateField(name, processedValue)
+    setFieldErrors((prev) => {
+      const newErrors = new Map(prev)
+      if (errorMessage) {
+        newErrors.set(name, errorMessage)
+      } else {
+        newErrors.delete(name)
+      }
+      return newErrors
+    })
+
+    // Clear global error when user starts typing
     setError(null)
   }
 
-  const validateForm = () => {
-    if (!formData.driversLicNo || formData.driversLicNo.length !== 9) {
-      setError('Driver\'s license number must be 9 digits')
-      return false
-    }
-    if (!formData.controlNo || formData.controlNo.length !== 10) {
-      setError('Control number must be 10 digits')
-      return false
-    }
-    if (!formData.origLicIssueDate) {
-      setError('Original license issue date is required')
-      return false
-    }
-    if (!formData.dateOfBirth) {
-      setError('Date of birth is required')
-      return false
-    }
-    return true
+  const validateForm = (): boolean => {
+    const newErrors = new Map<string, string>()
+
+    Object.entries(formData).forEach(([key, value]) => {
+      const errorMessage = validateField(key, value)
+      if (errorMessage) {
+        newErrors.set(key, errorMessage)
+      }
+    })
+
+    setFieldErrors(newErrors)
+    return newErrors.size === 0
   }
 
   const handleSubmit = async (e: React.FormEvent) => {
@@ -59,6 +134,7 @@ export default function LookupPage() {
     setError(null)
 
     if (!validateForm()) {
+      setError('Please fix the errors in the form before submitting')
       return
     }
 
@@ -96,12 +172,10 @@ export default function LookupPage() {
 
         if (ticketsResponse.ok) {
           const ticketData = await ticketsResponse.json()
-          // Store both license data and ticket data in sessionStorage
           sessionStorage.setItem('licenseData', JSON.stringify(formData))
           sessionStorage.setItem('ticketData', JSON.stringify(ticketData))
           router.push('/dashboard')
         } else {
-          // If ticket search fails, still go to dashboard but it will show demo data
           sessionStorage.setItem('licenseData', JSON.stringify(formData))
           router.push('/dashboard')
         }
@@ -127,106 +201,90 @@ export default function LookupPage() {
           </p>
         </div>
 
-        <Alert open={!!error} onClose={() => setError(null)} color="red" className="mb-8">
-          <AlertTitle>Validation Error</AlertTitle>
-          <AlertDescription>{error}</AlertDescription>
-          <AlertActions>
-            <Button plain onClick={() => setError(null)}>
-              Dismiss
-            </Button>
-          </AlertActions>
-        </Alert>
+        <form onSubmit={handleSubmit} className="space-y-6">
+          <Field>
+            <Label>Driver&apos;s License Number</Label>
+            <Description>Enter your 9-digit license number</Description>
+            <Input
+              type="text"
+              name="driversLicNo"
+              value={formData.driversLicNo}
+              onChange={handleInputChange}
+              maxLength={9}
+              required
+              invalid={fieldErrors.has('driversLicNo')}
+            />
+            {fieldErrors.has('driversLicNo') && (
+              <ErrorMessage>{fieldErrors.get('driversLicNo')}</ErrorMessage>
+            )}
+          </Field>
 
-        <form onSubmit={handleSubmit} className="space-y-8">
-          <div className="rounded-2xl bg-zinc-50 dark:bg-zinc-900 p-8 ring-1 ring-zinc-950/5 dark:ring-white/10">
-            <div className="space-y-6">
-              <Field>
-                <Label>Driver's License Number</Label>
-                <Description>
-                  9-digit license number {formData.driversLicNo && `(${formData.driversLicNo.length}/9)`}
-                </Description>
-                <Input
-                  type="text"
-                  inputMode="numeric"
-                  name="driversLicNo"
-                  value={formData.driversLicNo}
-                  onChange={handleInputChange}
-                  placeholder="123456789"
-                  maxLength={9}
-                  required
-                />
-              </Field>
+          <Field>
+            <Label>Control Number</Label>
+            <Description>Enter your 10-digit control number</Description>
+            <Input
+              type="text"
+              name="controlNo"
+              value={formData.controlNo}
+              onChange={handleInputChange}
+              maxLength={10}
+              required
+              invalid={fieldErrors.has('controlNo')}
+            />
+            {fieldErrors.has('controlNo') && (
+              <ErrorMessage>{fieldErrors.get('controlNo')}</ErrorMessage>
+            )}
+          </Field>
 
-              <Field>
-                <Label>Control Number</Label>
-                <Description>
-                  10-digit control number from your license {formData.controlNo && `(${formData.controlNo.length}/10)`}
-                </Description>
-                <Input
-                  type="text"
-                  inputMode="numeric"
-                  name="controlNo"
-                  value={formData.controlNo}
-                  onChange={handleInputChange}
-                  placeholder="1234567890"
-                  maxLength={10}
-                  required
-                />
-              </Field>
+          <Field>
+            <Label>Original License Issue Date</Label>
+            <Description>When was your license first issued?</Description>
+            <Input
+              type="date"
+              name="origLicIssueDate"
+              value={formData.origLicIssueDate}
+              onChange={handleInputChange}
+              required
+              invalid={fieldErrors.has('origLicIssueDate')}
+            />
+            {fieldErrors.has('origLicIssueDate') && (
+              <ErrorMessage>{fieldErrors.get('origLicIssueDate')}</ErrorMessage>
+            )}
+          </Field>
 
-              <Field>
-                <Label>Original License Issue Date</Label>
-                <Description>Date when your license was first issued</Description>
-                <Input
-                  type="date"
-                  name="origLicIssueDate"
-                  value={formData.origLicIssueDate}
-                  onChange={handleInputChange}
-                  required
-                />
-              </Field>
+          <Field>
+            <Label>Date of Birth</Label>
+            <Description>Enter your date of birth</Description>
+            <Input
+              type="date"
+              name="dateOfBirth"
+              value={formData.dateOfBirth}
+              onChange={handleInputChange}
+              required
+              invalid={fieldErrors.has('dateOfBirth')}
+            />
+            {fieldErrors.has('dateOfBirth') && (
+              <ErrorMessage>{fieldErrors.get('dateOfBirth')}</ErrorMessage>
+            )}
+          </Field>
 
-              <Field>
-                <Label>Date of Birth</Label>
-                <Description>Your date of birth as shown on your license</Description>
-                <Input
-                  type="date"
-                  name="dateOfBirth"
-                  value={formData.dateOfBirth}
-                  onChange={handleInputChange}
-                  required
-                />
-              </Field>
-            </div>
-          </div>
-
-          <div className="flex gap-4">
-            <Button
-              type="submit"
-              color="blue"
-              className="flex-1"
-              disabled={isLoading}
-            >
-              <MagnifyingGlassIcon data-slot="icon" />
-              {isLoading ? 'Validating...' : 'Validate & Search'}
-            </Button>
-            <Button
-              type="button"
-              outline
-              onClick={() => router.push('/dashboard')}
-            >
-              View Demo
-            </Button>
-          </div>
+          <Button type="submit" disabled={isLoading || fieldErrors.size > 0} className="w-full">
+            <MagnifyingGlassIcon className="h-5 w-5" />
+            {isLoading ? 'Validating...' : 'Search Records'}
+          </Button>
         </form>
 
-        <div className="mt-8 rounded-xl bg-blue-50 dark:bg-blue-950/20 p-6">
-          <p className="text-sm text-zinc-600 dark:text-zinc-400">
-            <strong className="font-semibold text-zinc-950 dark:text-white">Privacy Note:</strong>{' '}
-            Your information is only used to validate your license and retrieve ticket records.
-            We do not store any personal information.
-          </p>
-        </div>
+        {error && (
+          <Alert open={!!error} onClose={() => setError(null)} color="red" className="mt-6">
+            <AlertTitle>Validation Failed</AlertTitle>
+            <AlertDescription>{error}</AlertDescription>
+            <AlertActions>
+              <Button plain onClick={() => setError(null)}>
+                Dismiss
+              </Button>
+            </AlertActions>
+          </Alert>
+        )}
       </main>
     </div>
   )

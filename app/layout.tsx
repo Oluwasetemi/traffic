@@ -16,6 +16,21 @@ export const metadata: Metadata = {
     title: "Jamaica Traffic Ticket Dashboard",
     description: "Look up and manage traffic tickets in Jamaica",
     type: "website",
+    images: [
+      {
+        url: "/og-images/opengraph-image.png",
+        width: 1200,
+        height: 630,
+        alt: "Jamaica Traffic Ticket Dashboard",
+      },
+    ],
+  },
+  twitter: {
+    card: "summary_large_image",
+    title: "Jamaica Traffic Ticket Dashboard",
+    description: "Look up and manage traffic tickets in Jamaica",
+    images: ["/og-images/opengraph-image.png"],
+    creator: "@setemiojo",
   },
 };
 

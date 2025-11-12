@@ -1,5 +1,5 @@
 import { NextRequest, NextResponse } from 'next/server'
-import type { TicketSearchRequest } from '@/app/types'
+import type { TicketSearchRequest, TrafficTicket } from '@/app/types'
 
 export async function POST(request: NextRequest) {
   try {
@@ -55,7 +55,7 @@ export async function POST(request: NextRequest) {
     const data = await response.json()
 
     // Transform the response to match our expected format
-    let rawTickets = []
+    let rawTickets = [] as TrafficTicket[]
 
     if (Array.isArray(data)) {
       rawTickets = data
@@ -67,13 +67,13 @@ export async function POST(request: NextRequest) {
     }
 
     // Map Jamaica API fields to our expected format
-    const tickets = rawTickets.map((ticket: any) => ({
+    const tickets = rawTickets.map((ticket) => ({
       id: ticket.ticketNo || ticket.id,
       ticketNumber: ticket.ticketNo,
       violation: ticket.offenceDesc || ticket.violation,
       violationDate: ticket.issueDate || ticket.violationDate,
       location: ticket.courtLocation || ticket.location || 'N/A',
-      fineAmount: parseFloat(ticket.fineAmount) || 0,
+      fineAmount: parseFloat(ticket?.fineAmount as unknown as string) || 0,
       status: ticket.workflowState === 'Paid' ? 'Paid' : 'Outstanding',
       dueDate: ticket.paymentDueDate || ticket.dueDate,
       officerName: 'Officer', // Officer name not provided in API
@@ -81,18 +81,18 @@ export async function POST(request: NextRequest) {
       offenderName: ticket.offenderFirstName && ticket.offenderLastName
         ? `${ticket.offenderFirstName} ${ticket.offenderLastName}`
         : 'N/A',
-      demeritPoints: parseInt(ticket.demeritPoints) || 0,
-      mandatoryCourtApp: ticket.mandatoryCourtApp === 'true' || ticket.mandatoryCourtApp === true,
+      demeritPoints: parseInt(ticket.demeritPoints as unknown as string) || 0,
+      mandatoryCourtApp: (ticket.mandatoryCourtApp === 'true' as unknown as boolean) || ticket.mandatoryCourtApp === true,
       offenceCode: ticket.offenceCode || 'N/A',
       paidDate: ticket.workflowState === 'Paid' ? ticket.courtDate : undefined,
       paymentMethod: ticket.workflowState === 'Paid' ? 'Paid' : undefined,
     }))
 
     // Calculate statistics
-    const outstanding = tickets.filter((t: any) => t.status === 'Outstanding').length
+    const outstanding = tickets.filter((t) => t.status === 'Outstanding').length
     const totalOutstanding = tickets
-      .filter((t: any) => t.status === 'Outstanding')
-      .reduce((sum: number, t: any) => sum + t.fineAmount, 0)
+      .filter((t) => t.status === 'Outstanding')
+      .reduce((sum: number, t) => sum + t.fineAmount, 0)
 
     const transformedData = {
       tickets,

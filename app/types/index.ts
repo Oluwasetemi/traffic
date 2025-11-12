@@ -23,6 +23,7 @@ export interface TrafficTicket {
   offenceCode?: string
   paidDate?: string
   paymentMethod?: string
+  [index: string]: unknown | string | number
 }
 
 export interface TicketSearchRequest {

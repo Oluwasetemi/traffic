@@ -188,7 +188,7 @@ export default function Home() {
               Ready to check your tickets?
             </h2>
             <p className="mx-auto mt-6 max-w-xl text-lg leading-8 text-zinc-300">
-              Enter your driver's license information to view your traffic ticket records
+              Enter your driver&apos;s license information to view your traffic ticket records
             </p>
             <div className="mt-10 flex items-center justify-center gap-x-6">
               <Button color="white" onClick={() => router.push('/lookup')}>

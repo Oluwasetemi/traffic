@@ -197,7 +197,7 @@ export default function LookupPage() {
             License Validation
           </h1>
           <p className="mt-6 text-lg leading-8 text-zinc-600 dark:text-zinc-400">
-            Enter your driver's license information to view your traffic ticket records
+            Enter your driver&apos;s license information to view your traffic ticket records
           </p>
         </div>
 

@@ -77,8 +77,8 @@ export default function DashboardPage() {
 
   const filteredTickets = data?.tickets?.filter((ticket) => {
     if (filter === 'all') return true
-    if (filter === 'outstanding') return ticket.status === 'Outstanding' || ticket.status === 'OUTSTANDING'
-    if (filter === 'paid') return ticket.status === 'Paid' || ticket.status === 'PAID'
+    if (filter === 'outstanding') return ticket.status.toLowerCase() === 'outstanding'
+    if (filter === 'paid') return ticket.status.toLowerCase() === 'paid'
     return true
   }) || []
 

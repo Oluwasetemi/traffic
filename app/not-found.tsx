@@ -1,4 +1,4 @@
-import Link from 'next/link'
+import { Link } from './components/link'
 import { ChevronRightIcon } from '@heroicons/react/20/solid'
 import { MagnifyingGlassIcon, DocumentTextIcon, CreditCardIcon } from '@heroicons/react/24/solid'
 

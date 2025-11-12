@@ -72,7 +72,7 @@ export default function PaymentPage() {
                   <p className="text-sm font-medium text-zinc-700 dark:text-zinc-300 mb-2">Steps:</p>
                   <ol className="list-decimal list-inside space-y-2 text-sm text-zinc-600 dark:text-zinc-400">
                     <li>Visit the TAJ portal</li>
-                    <li>Enter your ticket number and driver's license number</li>
+                    <li>Enter your ticket number and driver&apos;s license number</li>
                     <li>View outstanding fines</li>
                     <li>Add tickets to cart (can pay multiple at once)</li>
                     <li>Pay via Visa, MasterCard, or KeyCard</li>
@@ -80,7 +80,7 @@ export default function PaymentPage() {
                 </div>
                 <div className="rounded-lg bg-green-50 dark:bg-green-950/20 p-4 border border-green-200 dark:border-green-900">
                   <div className="flex gap-2">
-                    <CheckCircleIcon className="size-5 text-green-600 dark:text-green-400 flex-shrink-0" />
+                    <CheckCircleIcon className="size-5 text-green-600 dark:text-green-400 shrink-0" />
                     <p className="text-sm text-green-700 dark:text-green-300">
                       Available 24/7 with immediate confirmation
                     </p>
@@ -293,7 +293,7 @@ export default function PaymentPage() {
                   Consequences of Unpaid Tickets
                 </h3>
                 <ul className="text-sm text-yellow-700 dark:text-yellow-300 space-y-1 list-disc list-inside">
-                  <li>Cannot renew driver's license</li>
+                  <li>Cannot renew driver&apos;s license</li>
                   <li>Cannot transfer vehicle titles</li>
                   <li>Cannot pay fitness and registration fees</li>
                   <li>Arrest warrants issued for non-compliance</li>

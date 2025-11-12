@@ -8,6 +8,9 @@ export const metadata: Metadata = {
   description: "Look up and manage traffic tickets in Jamaica. Built with the official Jamaica Traffic Ticket Lookup API.",
   keywords: ["Jamaica", "traffic tickets", "driver's license", "violations", "fines"],
   authors: [{ name: "Jamaica Traffic Ticket Dashboard" }],
+  icons: {
+    icon: "https://fav.farm/🚦",
+  },
   openGraph: {
     title: "Jamaica Traffic Ticket Dashboard",
     description: "Look up and manage traffic tickets in Jamaica",

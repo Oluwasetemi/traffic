@@ -269,7 +269,7 @@ export default function LookupPage() {
           </Field>
 
           <div className="flex gap-4">
-            <Button type="submit" disabled={isLoading || fieldErrors.size > 0} className="flex-1">
+            <Button type="submit" color="blue" disabled={isLoading || fieldErrors.size > 0} className="flex-1">
               <MagnifyingGlassIcon className="h-5 w-5" />
               {isLoading ? 'Validating...' : 'Validate & Search'}
             </Button>

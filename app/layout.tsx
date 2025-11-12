@@ -4,7 +4,12 @@ import { ThemeProvider } from "./components/theme-provider";
 import { AppNavbar } from "./components/app-navbar";
 import Footer from "./components/ui/footer";
 
+const baseUrl = process.env.NEXT_PUBLIC_BASE_URL || 
+  process.env.VERCEL_URL ? `https://${process.env.VERCEL_URL}` : 
+  'http://localhost:3000';
+
 export const metadata: Metadata = {
+  metadataBase: new URL(baseUrl),
   title: "Jamaica Traffic Ticket Dashboard",
   description: "Look up and manage traffic tickets in Jamaica. Built with the official Jamaica Traffic Ticket Lookup API.",
   keywords: ["Jamaica", "traffic tickets", "driver's license", "violations", "fines"],

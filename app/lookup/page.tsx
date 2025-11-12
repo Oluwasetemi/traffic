@@ -127,17 +127,15 @@ export default function LookupPage() {
           </p>
         </div>
 
-        {error && (
-          <Alert color="red" className="mb-8">
-            <AlertTitle>Validation Error</AlertTitle>
-            <AlertDescription>{error}</AlertDescription>
-            <AlertActions>
-              <Button plain onClick={() => setError(null)}>
-                Dismiss
-              </Button>
-            </AlertActions>
-          </Alert>
-        )}
+        <Alert open={!!error} onClose={() => setError(null)} color="red" className="mb-8">
+          <AlertTitle>Validation Error</AlertTitle>
+          <AlertDescription>{error}</AlertDescription>
+          <AlertActions>
+            <Button plain onClick={() => setError(null)}>
+              Dismiss
+            </Button>
+          </AlertActions>
+        </Alert>
 
         <form onSubmit={handleSubmit} className="space-y-8">
           <div className="rounded-2xl bg-zinc-50 dark:bg-zinc-900 p-8 ring-1 ring-zinc-950/5 dark:ring-white/10">

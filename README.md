@@ -1,36 +1,167 @@
-This is a [Next.js](https://nextjs.org) project bootstrapped with [`create-next-app`](https://nextjs.org/docs/app/api-reference/cli/create-next-app).
+# Jamaica Traffic Ticket Dashboard
+
+A modern, full-stack web application for looking up and managing traffic tickets in Jamaica. Built with Next.js 16, React 19, and the official Jamaica Traffic Ticket Lookup API.
+
+![Dashboard Preview](https://img.shields.io/badge/Status-Demo-blue)
+
+## Features
+
+- **License Validation**: Verify driver's license information against the official database
+- **Interactive Dashboard**: Visualize ticket statistics with charts and graphs
+- **Ticket Management**: View outstanding and paid tickets with detailed information
+- **Analytics**: Track violations by type, status, and timeline
+- **Modern UI**: Clean, responsive design with Tailwind CSS v4
+- **Dark Mode**: Full support for light and dark themes with system preference detection
+
+## Tech Stack
+
+- **Framework**: Next.js 16 (App Router)
+- **React**: React 19
+- **Styling**: Tailwind CSS v4
+- **UI Components**: Headless UI
+- **Icons**: Heroicons
+- **Animations**: Motion (Framer Motion)
+- **Language**: TypeScript
 
 ## Getting Started
 
-First, run the development server:
+### Prerequisites
 
+- Node.js 20+ or Bun
+- npm, yarn, or bun
+
+### Installation
+
+1. Clone the repository:
+```bash
+git clone <repository-url>
+cd traffic
+```
+
+2. Install dependencies:
+```bash
+npm install
+# or
+bun install
+```
+
+3. Copy the environment variables:
+```bash
+cp .env.example .env.local
+```
+
+4. Run the development server:
 ```bash
 npm run dev
-# or
-yarn dev
-# or
-pnpm dev
 # or
 bun dev
 ```
 
-Open [http://localhost:3000](http://localhost:3000) with your browser to see the result.
+5. Open [http://localhost:3000](http://localhost:3000) in your browser
 
-You can start editing the page by modifying `app/page.tsx`. The page auto-updates as you edit the file.
+## Project Structure
 
-This project uses [`next/font`](https://nextjs.org/docs/app/building-your-application/optimizing/fonts) to automatically optimize and load [Geist](https://vercel.com/font), a new font family for Vercel.
+```
+app/
+├── api/                    # API routes
+│   ├── validate-license/   # License validation endpoint
+│   ├── search-tickets/     # Ticket search endpoint
+│   └── demo/               # Demo data endpoint
+├── components/             # Reusable UI components
+├── dashboard/              # Dashboard page
+├── lookup/                 # License lookup page
+├── types/                  # TypeScript type definitions
+├── layout.tsx              # Root layout
+└── page.tsx                # Landing page
+```
 
-## Learn More
+## Pages
 
-To learn more about Next.js, take a look at the following resources:
+### Landing Page (`/`)
+- Hero section with app introduction
+- Feature highlights
+- Call-to-action buttons
+- Responsive design with gradient backgrounds
 
-- [Next.js Documentation](https://nextjs.org/docs) - learn about Next.js features and API.
-- [Learn Next.js](https://nextjs.org/learn) - an interactive Next.js tutorial.
+### License Lookup (`/lookup`)
+- Driver's license validation form
+- Client-side validation
+- Error handling and feedback
+- Privacy notice
 
-You can check out [the Next.js GitHub repository](https://github.com/vercel/next.js) - your feedback and contributions are welcome!
+### Dashboard (`/dashboard`)
+- Overview statistics cards
+- Ticket filtering (All, Outstanding, Paid)
+- Detailed ticket table
+- Expandable ticket details
+- Demo mode available
 
-## Deploy on Vercel
+## API Routes
 
-The easiest way to deploy your Next.js app is to use the [Vercel Platform](https://vercel.com/new?utm_medium=default-template&filter=next.js&utm_source=create-next-app&utm_campaign=create-next-app-readme) from the creators of Next.js.
+### POST `/api/validate-license`
+Validates driver's license information against the Jamaica government API.
 
-Check out our [Next.js deployment documentation](https://nextjs.org/docs/app/building-your-application/deploying) for more details.
+**Request Body:**
+```json
+{
+  "driversLicNo": "123456789",
+  "controlNo": "1234567890",
+  "origLicIssueDate": "2020-01-01",
+  "dateOfBirth": "1990-01-01"
+}
+```
+
+### POST `/api/search-tickets`
+Searches for traffic tickets associated with validated license.
+
+### GET `/api/demo/search-tickets`
+Returns demo ticket data for testing without API calls.
+
+## Features in Detail
+
+### Theme Support
+- Automatic dark mode detection
+- Manual theme toggle
+- Persistent theme preference
+- Smooth transitions
+
+### Responsive Design
+- Mobile-first approach
+- Tablet and desktop optimized
+- Touch-friendly interactions
+
+### Type Safety
+- Full TypeScript coverage
+- Type-safe API calls
+- Validated form inputs
+
+## Development
+
+### Build for Production
+```bash
+npm run build
+npm start
+```
+
+### Linting
+```bash
+npm run lint
+```
+
+## Deployment
+
+This application is configured for deployment on Netlify (see `netlify.toml`).
+
+### Environment Variables
+- `NEXT_PUBLIC_BASE_URL`: Your deployed application URL
+
+## Security & Privacy
+
+- No personal information is stored
+- API calls are proxied through Next.js API routes
+- Input sanitization and validation
+- CORS handling at API level
+
+## Disclaimer
+
+This application uses the official Jamaica Traffic Ticket Lookup API. Always refer to official government sources for authoritative information. Use responsibly and in compliance with terms of service.

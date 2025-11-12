@@ -1,26 +1,55 @@
 @import "tailwindcss";
 
-:root {
+@variant dark (&:is(.dark, .dark *));
+@custom-variant light (&:is(.light, .light *));
+@custom-variant auto (&:is(.auto, .auto *));
+@custom-variant aria-current (&[aria-current="location"]);
+
+:root,
+.light {
   --background: #ffffff;
   --foreground: #171717;
+}
+
+.dark {
+  --background: #0a0a0a;
+  --foreground: #ededed;
 }
 
 @theme inline {
   --color-background: var(--background);
   --color-foreground: var(--foreground);
-  --font-sans: var(--font-geist-sans);
-  --font-mono: var(--font-geist-mono);
 }
 
-@media (prefers-color-scheme: dark) {
-  :root {
-    --background: #0a0a0a;
-    --foreground: #ededed;
-  }
+html {
+  background: var(--background);
+  color: var(--foreground);
 }
 
 body {
   background: var(--background);
   color: var(--foreground);
-  font-family: Arial, Helvetica, sans-serif;
+  font-family:
+    "Inter",
+    -apple-system,
+    BlinkMacSystemFont,
+    "Segoe UI",
+    "Roboto",
+    "Oxygen",
+    "Ubuntu",
+    "Cantarell",
+    "Fira Sans",
+    "Droid Sans",
+    "Helvetica Neue",
+    sans-serif;
+  font-feature-settings:
+    "liga" 1,
+    "calt" 1;
+  font-size: 16px;
+  min-height: 100vh;
+}
+
+/* Ensure dialog portals have highest z-index */
+[data-headlessui-portal] {
+  z-index: 9999 !important;
 }

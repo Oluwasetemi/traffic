@@ -1,0 +1,102 @@
+import { NextResponse } from 'next/server'
+import type { TicketSearchResponse } from '@/app/types'
+
+// Demo data for testing without hitting the actual API
+const demoData: TicketSearchResponse = {
+  tickets: [
+    {
+      id: '1',
+      ticketNumber: 'TK-2024-001234',
+      violation: 'Speeding - 20km/h over limit',
+      violationDate: '2024-01-15',
+      location: 'Spanish Town Road, Kingston',
+      fineAmount: 5000,
+      status: 'Outstanding',
+      dueDate: '2024-02-15',
+      officerName: 'Officer',
+      officerBadge: 'S001',
+      offenceCode: 'S001',
+      offenderName: 'Demo User',
+      demeritPoints: 3,
+      mandatoryCourtApp: false,
+    },
+    {
+      id: '2',
+      ticketNumber: 'TK-2023-009876',
+      violation: 'Illegal Parking',
+      violationDate: '2023-11-20',
+      location: 'Half Way Tree, Kingston',
+      fineAmount: 3000,
+      status: 'Paid',
+      dueDate: '2023-12-20',
+      officerName: 'Officer',
+      officerBadge: 'P002',
+      offenceCode: 'P002',
+      offenderName: 'Demo User',
+      demeritPoints: 0,
+      mandatoryCourtApp: false,
+      paidDate: '2023-12-10',
+      paymentMethod: 'Online',
+    },
+    {
+      id: '3',
+      ticketNumber: 'TK-2024-002345',
+      violation: 'Running Red Light',
+      violationDate: '2024-02-10',
+      location: 'Hope Road, Kingston',
+      fineAmount: 8000,
+      status: 'Outstanding',
+      dueDate: '2024-03-10',
+      officerName: 'Officer',
+      officerBadge: 'R003',
+      offenceCode: 'R003',
+      offenderName: 'Demo User',
+      demeritPoints: 6,
+      mandatoryCourtApp: true,
+    },
+    {
+      id: '4',
+      ticketNumber: 'TK-2023-007654',
+      violation: 'No Seatbelt',
+      violationDate: '2023-09-05',
+      location: 'Constant Spring Road, Kingston',
+      fineAmount: 2000,
+      status: 'Paid',
+      dueDate: '2023-10-05',
+      officerName: 'Officer',
+      officerBadge: 'B004',
+      offenceCode: 'B004',
+      offenderName: 'Demo User',
+      demeritPoints: 2,
+      mandatoryCourtApp: false,
+      paidDate: '2023-09-28',
+      paymentMethod: 'Cash',
+    },
+    {
+      id: '5',
+      ticketNumber: 'TK-2024-003456',
+      violation: 'Expired Registration',
+      violationDate: '2024-03-01',
+      location: 'Old Harbour Road, St. Catherine',
+      fineAmount: 4500,
+      status: 'Outstanding',
+      dueDate: '2024-04-01',
+      officerName: 'Officer',
+      officerBadge: 'E005',
+      offenceCode: 'E005',
+      offenderName: 'Demo User',
+      demeritPoints: 0,
+      mandatoryCourtApp: false,
+    },
+  ],
+  totalTickets: 5,
+  outstanding: 3,
+  totalOutstanding: 17500,
+}
+
+export async function GET() {
+  // Simulate network delay
+  await new Promise((resolve) => setTimeout(resolve, 500))
+
+  return NextResponse.json(demoData)
+}

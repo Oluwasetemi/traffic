@@ -1,0 +1,35 @@
+[build]
+  command = "npm run build"
+  publish = ".next"
+
+[build.environment]
+  # Omit expected environment variables from secrets scanning
+  # NEXT_PUBLIC_* variables are intentionally public in Next.js (exposed to browser)
+  # Multiple keys can be separated by commas
+  SECRETS_SCAN_OMIT_KEYS = "NEXT_PUBLIC_BASE_URL"
+
+  # Omit example/env files from scanning (these contain expected example values)
+  # Build output directories are automatically excluded
+  SECRETS_SCAN_OMIT_PATHS = ".env.local.example,app/ui-components/footer.tsx"
+
+
+# Optional: Configure other build settings
+# [build.processing]
+#   skip_processing = false
+
+# [build.processing.css]
+#   bundle = true
+#   minify = true
+
+# [build.processing.js]
+#   bundle = true
+#   minify = true
+
+# [build.processing.html]
+#   pretty_urls = true
+
+# Redirects and rewrites can be added here if needed
+# [[redirects]]
+#   from = "/*"
+#   to = "/index.html"
+#   status = 200

@@ -1,0 +1,49 @@
+export interface DriverLicenseValidationRequest {
+  driversLicNo: string
+  controlNo: string
+  origLicIssueDate: string // YYYY-MM-DD
+  dateOfBirth: string // YYYY-MM-DD
+  ipAddress?: string
+}
+
+export interface TrafficTicket {
+  id: string
+  ticketNumber: string
+  violation: string
+  violationDate: string
+  location: string
+  fineAmount: number
+  status: 'Outstanding' | 'Paid'
+  dueDate: string
+  officerName: string
+  officerBadge: string
+  offenderName?: string
+  demeritPoints?: number
+  mandatoryCourtApp?: boolean
+  offenceCode?: string
+  paidDate?: string
+  paymentMethod?: string
+}
+
+export interface TicketSearchRequest {
+  driversLicNo: string
+  controlNo: string
+  dateOfBirth: string
+  origLicIssueDate?: string
+}
+
+export interface TicketSearchResponse {
+  tickets: TrafficTicket[]
+  totalTickets: number
+  outstanding: number
+  totalOutstanding: number
+}
+
+export interface ApiError {
+  type: string
+  title: string
+  status: number
+  detail: string
+  path: string
+  message: string
+}

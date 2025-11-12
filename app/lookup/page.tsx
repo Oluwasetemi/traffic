@@ -268,10 +268,19 @@ export default function LookupPage() {
             )}
           </Field>
 
-          <Button type="submit" disabled={isLoading || fieldErrors.size > 0} className="w-full">
-            <MagnifyingGlassIcon className="h-5 w-5" />
-            {isLoading ? 'Validating...' : 'Search Records'}
-          </Button>
+          <div className="flex gap-4">
+            <Button type="submit" disabled={isLoading || fieldErrors.size > 0} className="flex-1">
+              <MagnifyingGlassIcon className="h-5 w-5" />
+              {isLoading ? 'Validating...' : 'Validate & Search'}
+            </Button>
+            <Button
+              type="button"
+              outline
+              onClick={() => router.push('/dashboard')}
+            >
+              View Demo
+            </Button>
+          </div>
         </form>
 
         {error && (

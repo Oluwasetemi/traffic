@@ -2,6 +2,7 @@ import type { Metadata } from "next";
 import "./globals.css";
 import { ThemeProvider } from "./components/theme-provider";
 import { AppNavbar } from "./components/app-navbar";
+import Footer from "./components/ui/footer";
 
 export const metadata: Metadata = {
   title: "Jamaica Traffic Ticket Dashboard",
@@ -44,6 +45,7 @@ export default function RootLayout({
         <ThemeProvider>
           <AppNavbar />
           {children}
+          <Footer />
         </ThemeProvider>
       </body>
     </html>

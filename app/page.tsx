@@ -6,8 +6,44 @@ import {
   ShieldCheckIcon,
   DocumentTextIcon
 } from '@heroicons/react/24/outline'
+import { CheckIcon } from '@heroicons/react/20/solid'
 import { Button } from './components/button'
 import { useTransitionRouter } from 'next-view-transitions'
+
+const solutions = [
+  {
+    name: 'Simple Date Entry',
+    description: 'No more confusing date formats - our intuitive date picker handles validation automatically',
+  },
+  {
+    name: 'Unified Dashboard',
+    description: 'View all your tickets, fines, and demerit points in one organized dashboard',
+  },
+  {
+    name: 'Comprehensive Offence Guide',
+    description: 'Browse detailed information about traffic violations, fines, and demerit points',
+  },
+  {
+    name: 'Payment Information',
+    description: 'Access complete payment options including online, mobile app, and in-person methods',
+  },
+  {
+    name: 'Smart Validation',
+    description: 'Automatic form validation with helpful error messages to guide you',
+  },
+  {
+    name: 'Accessible Design',
+    description: 'Built with accessibility in mind - easy to use on any device',
+  },
+  {
+    name: 'Demerit Point Tracking',
+    description: 'Monitor your demerit points and get warnings about potential license suspension',
+  },
+  {
+    name: 'Dark Mode Support',
+    description: 'Comfortable viewing experience in any lighting condition',
+  },
+]
 
 const features = [
   {
@@ -80,6 +116,39 @@ export default function Home() {
                   'polygon(74.1% 44.1%, 100% 61.6%, 97.5% 26.9%, 85.5% 0.1%, 80.7% 2%, 72.5% 32.5%, 60.2% 62.4%, 52.4% 68.1%, 47.5% 58.3%, 45.2% 34.5%, 27.5% 76.7%, 0.1% 64.9%, 17.9% 100%, 27.6% 76.8%, 76.1% 97.7%, 74.1% 44.1%)',
               }}
             />
+          </div>
+        </div>
+
+        {/* Problem-Solution Section */}
+        <div className="bg-white py-24 sm:py-32 dark:bg-zinc-900">
+          <div className="mx-auto max-w-7xl px-6 lg:px-8">
+            <div className="mx-auto grid max-w-2xl grid-cols-1 gap-x-8 gap-y-16 sm:gap-y-20 lg:mx-0 lg:max-w-none lg:grid-cols-5">
+              <div className="col-span-2">
+                <h2 className="text-base/7 font-semibold text-blue-600 dark:text-blue-400">A Better Way</h2>
+                <p className="mt-2 text-4xl font-semibold tracking-tight text-pretty text-zinc-950 sm:text-5xl dark:text-white">
+                  Solving the Pain Points
+                </p>
+                <p className="mt-6 text-base/7 text-zinc-700 dark:text-zinc-300">
+                  The government traffic lookup website is difficult to navigate with confusing date formats,
+                  no centralized dashboard, and limited information about offences and payment options.
+                  I built a better solution.
+                </p>
+              </div>
+              <dl className="col-span-3 grid grid-cols-1 gap-x-8 gap-y-10 text-base/7 text-zinc-600 sm:grid-cols-2 lg:gap-y-16 dark:text-zinc-400">
+                {solutions.map((solution) => (
+                  <div key={solution.name} className="relative pl-9">
+                    <dt className="font-semibold text-zinc-950 dark:text-white">
+                      <CheckIcon
+                        aria-hidden="true"
+                        className="absolute top-1 left-0 size-5 text-blue-600 dark:text-blue-400"
+                      />
+                      {solution.name}
+                    </dt>
+                    <dd className="mt-2">{solution.description}</dd>
+                  </div>
+                ))}
+              </dl>
+            </div>
           </div>
         </div>
 

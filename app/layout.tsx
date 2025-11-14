@@ -2,10 +2,12 @@ import type { Metadata } from "next";
 import "./globals.css";
 import { ViewTransitions } from 'next-view-transitions';
 import { ThemeProvider } from "./components/theme-provider";
+import { StackedLayout } from "./components/stacked-layout";
 import { AppNavbar } from "./components/app-navbar";
+import { AppSidebar } from "./components/app-sidebar";
 import Footer from "./components/ui/footer";
 
-const baseUrl = 
+const baseUrl =
   process.env.NEXT_PUBLIC_BASE_URL ||
   (process.env.VERCEL_URL ? `https://${process.env.VERCEL_URL}` : 'http://localhost:3000');
 
@@ -65,9 +67,10 @@ export default function RootLayout({
         </head>
         <body className="antialiased">
           <ThemeProvider>
-            <AppNavbar />
-            {children}
-            <Footer />
+            <StackedLayout navbar={<AppNavbar />} sidebar={<AppSidebar />}>
+              {children}
+              <Footer />
+            </StackedLayout>
           </ThemeProvider>
         </body>
       </html>

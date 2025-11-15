@@ -12,14 +12,19 @@
   "dependencies": {
     "@headlessui/react": "^2.2.9",
     "@heroicons/react": "^2.2.0",
+    "@huggingface/transformers": "^3.7.6",
     "@vercel/og": "^0.8.5",
     "clsx": "^2.1.1",
     "motion": "^12.23.24",
     "next": "16.0.1",
     "next-view-transitions": "^0.3.4",
+    "process": "^0.11.10",
     "react": "19.2.0",
     "react-dom": "19.2.0",
-    "temporal-polyfill": "^0.3.0"
+    "react-dropzone": "^14.3.8",
+    "react-webcam": "^7.2.0",
+    "temporal-polyfill": "^0.3.0",
+    "tesseract.js": "^6.0.1"
   },
   "devDependencies": {
     "@setemiojo/utils": "^0.0.4",

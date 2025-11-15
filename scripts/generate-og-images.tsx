@@ -158,7 +158,7 @@ async function generateOGImage(config: OGImageConfig) {
 }
 
 async function main() {
-  console.log('🎨 Generating OG images...\n')
+  console.log('Generating OG images...\n')
 
   // Create output directory
   const outputDir = join(process.cwd(), 'public', 'og-images')

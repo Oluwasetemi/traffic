@@ -6,6 +6,7 @@ const nextConfig: NextConfig = {
   typescript: {
     ignoreBuildErrors: true,
   },
+  serverExternalPackages: ["sharp", "onnxruntime-node"],
   reactCompiler: true,
   turbopack: {
     root: __dirname,

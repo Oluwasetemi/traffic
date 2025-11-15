@@ -8,14 +8,18 @@ import { Button } from '../components/button'
 import { Input } from '../components/input'
 import { Field, Label, Description, ErrorMessage } from '../components/fieldset'
 import { Alert, AlertActions, AlertDescription, AlertTitle } from '../components/alert'
-import { MagnifyingGlassIcon } from '@heroicons/react/24/outline'
+import { LicenseCapture } from '../components/license-capture'
+import { MagnifyingGlassIcon, CameraIcon } from '@heroicons/react/24/outline'
 import type { DriverLicenseValidationRequest } from '../types'
+import type { ExtractedLicenseData } from '../types/ocr'
 
 export default function LookupPage() {
   const router = useTransitionRouter()
   const [isLoading, setIsLoading] = useState(false)
   const [error, setError] = useState<string | null>(null)
   const [fieldErrors, setFieldErrors] = useState<Map<string, string>>(new Map())
+  const [isCaptureOpen, setIsCaptureOpen] = useState(false)
+  const [autoFilledFields, setAutoFilledFields] = useState<Set<string>>(new Set())
   const [formData, setFormData] = useState({
     driversLicNo: '',
     controlNo: '',
@@ -99,6 +103,15 @@ export default function LookupPage() {
 
     setFormData((prev) => ({ ...prev, [name]: processedValue }))
 
+    // Remove from auto-filled fields when user manually edits
+    if (autoFilledFields.has(name)) {
+      setAutoFilledFields((prev) => {
+        const newSet = new Set(prev)
+        newSet.delete(name)
+        return newSet
+      })
+    }
+
     // Real-time validation
     const errorMessage = validateField(name, processedValue)
     setFieldErrors((prev) => {
@@ -112,6 +125,36 @@ export default function LookupPage() {
     })
 
     // Clear global error when user starts typing
+    setError(null)
+  }
+
+  const handleDataExtracted = (data: ExtractedLicenseData) => {
+    const fieldsToFill: Set<string> = new Set()
+
+    if (data.driversLicNo) {
+      setFormData((prev) => ({ ...prev, driversLicNo: data.driversLicNo || '' }))
+      fieldsToFill.add('driversLicNo')
+    }
+
+    if (data.controlNo) {
+      setFormData((prev) => ({ ...prev, controlNo: data.controlNo || '' }))
+      fieldsToFill.add('controlNo')
+    }
+
+    if (data.dateOfBirth) {
+      setFormData((prev) => ({ ...prev, dateOfBirth: data.dateOfBirth || '' }))
+      fieldsToFill.add('dateOfBirth')
+    }
+
+    if (data.origLicIssueDate) {
+      setFormData((prev) => ({ ...prev, origLicIssueDate: data.origLicIssueDate || '' }))
+      fieldsToFill.add('origLicIssueDate')
+    }
+
+    setAutoFilledFields(fieldsToFill)
+
+    // Clear field errors for successfully extracted fields
+    setFieldErrors(new Map())
     setError(null)
   }
 
@@ -201,19 +244,43 @@ export default function LookupPage() {
           </p>
         </div>
 
+        {/* Scan License Button */}
+        <div className="mb-8">
+          <Button
+            type="button"
+            onClick={() => setIsCaptureOpen(true)}
+            color="blue"
+            className="w-full"
+          >
+            <CameraIcon className="h-5 w-5" />
+            Scan License with Camera
+          </Button>
+          <p className="mt-2 text-center text-sm text-zinc-600 dark:text-zinc-400">
+            Or enter your information manually below
+          </p>
+        </div>
+
         <form onSubmit={handleSubmit} className="space-y-6">
           <Field>
             <Label>Driver&apos;s License Number</Label>
             <Description>Enter your 9-digit license number</Description>
-            <Input
-              type="text"
-              name="driversLicNo"
-              value={formData.driversLicNo}
-              onChange={handleInputChange}
-              maxLength={9}
-              required
-              invalid={fieldErrors.has('driversLicNo')}
-            />
+            <div className="relative">
+              <Input
+                type="text"
+                name="driversLicNo"
+                value={formData.driversLicNo}
+                onChange={handleInputChange}
+                maxLength={9}
+                required
+                invalid={fieldErrors.has('driversLicNo')}
+                className={autoFilledFields.has('driversLicNo') ? 'ring-2 ring-green-500 dark:ring-green-400' : ''}
+              />
+              {autoFilledFields.has('driversLicNo') && (
+                <span className="absolute right-3 top-1/2 -translate-y-1/2 text-xs text-green-600 dark:text-green-400">
+                  Auto-filled
+                </span>
+              )}
+            </div>
             {fieldErrors.has('driversLicNo') && (
               <ErrorMessage>{fieldErrors.get('driversLicNo')}</ErrorMessage>
             )}
@@ -222,15 +289,23 @@ export default function LookupPage() {
           <Field>
             <Label>Control Number</Label>
             <Description>Enter your 10-digit control number</Description>
-            <Input
-              type="text"
-              name="controlNo"
-              value={formData.controlNo}
-              onChange={handleInputChange}
-              maxLength={10}
-              required
-              invalid={fieldErrors.has('controlNo')}
-            />
+            <div className="relative">
+              <Input
+                type="text"
+                name="controlNo"
+                value={formData.controlNo}
+                onChange={handleInputChange}
+                maxLength={10}
+                required
+                invalid={fieldErrors.has('controlNo')}
+                className={autoFilledFields.has('controlNo') ? 'ring-2 ring-green-500 dark:ring-green-400' : ''}
+              />
+              {autoFilledFields.has('controlNo') && (
+                <span className="absolute right-3 top-1/2 -translate-y-1/2 text-xs text-green-600 dark:text-green-400">
+                  Auto-filled
+                </span>
+              )}
+            </div>
             {fieldErrors.has('controlNo') && (
               <ErrorMessage>{fieldErrors.get('controlNo')}</ErrorMessage>
             )}
@@ -239,14 +314,22 @@ export default function LookupPage() {
           <Field>
             <Label>Original License Issue Date</Label>
             <Description>When was your license first issued?</Description>
-            <Input
-              type="date"
-              name="origLicIssueDate"
-              value={formData.origLicIssueDate}
-              onChange={handleInputChange}
-              required
-              invalid={fieldErrors.has('origLicIssueDate')}
-            />
+            <div className="relative">
+              <Input
+                type="date"
+                name="origLicIssueDate"
+                value={formData.origLicIssueDate}
+                onChange={handleInputChange}
+                required
+                invalid={fieldErrors.has('origLicIssueDate')}
+                className={autoFilledFields.has('origLicIssueDate') ? 'ring-2 ring-green-500 dark:ring-green-400' : ''}
+              />
+              {autoFilledFields.has('origLicIssueDate') && (
+                <span className="absolute right-3 top-1/2 -translate-y-1/2 text-xs text-green-600 dark:text-green-400">
+                  Auto-filled
+                </span>
+              )}
+            </div>
             {fieldErrors.has('origLicIssueDate') && (
               <ErrorMessage>{fieldErrors.get('origLicIssueDate')}</ErrorMessage>
             )}
@@ -255,14 +338,22 @@ export default function LookupPage() {
           <Field>
             <Label>Date of Birth</Label>
             <Description>Enter your date of birth</Description>
-            <Input
-              type="date"
-              name="dateOfBirth"
-              value={formData.dateOfBirth}
-              onChange={handleInputChange}
-              required
-              invalid={fieldErrors.has('dateOfBirth')}
-            />
+            <div className="relative">
+              <Input
+                type="date"
+                name="dateOfBirth"
+                value={formData.dateOfBirth}
+                onChange={handleInputChange}
+                required
+                invalid={fieldErrors.has('dateOfBirth')}
+                className={autoFilledFields.has('dateOfBirth') ? 'ring-2 ring-green-500 dark:ring-green-400' : ''}
+              />
+              {autoFilledFields.has('dateOfBirth') && (
+                <span className="absolute right-3 top-1/2 -translate-y-1/2 text-xs text-green-600 dark:text-green-400">
+                  Auto-filled
+                </span>
+              )}
+            </div>
             {fieldErrors.has('dateOfBirth') && (
               <ErrorMessage>{fieldErrors.get('dateOfBirth')}</ErrorMessage>
             )}
@@ -294,6 +385,13 @@ export default function LookupPage() {
             </AlertActions>
           </Alert>
         )}
+
+        {/* License Capture Modal */}
+        <LicenseCapture
+          isOpen={isCaptureOpen}
+          onClose={() => setIsCaptureOpen(false)}
+          onDataExtracted={handleDataExtracted}
+        />
       </main>
     </div>
   )

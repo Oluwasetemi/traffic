@@ -10,7 +10,7 @@ import {
   validateExtractedData,
   initializeOCRWorker,
 } from '../lib/ocr'
-import { extractText, type OCREngine } from '../lib/ocr-unified'
+import { extractText, extractLicenseData, type OCREngine } from '../lib/ocr-unified'
 import { initializeTransformersOCR } from '../lib/ocr-transformers'
 
 export function useOCR(initialEngine: OCREngine = 'tesseract') {
@@ -74,7 +74,7 @@ export function useOCR(initialEngine: OCREngine = 'tesseract') {
 
       setProcessingState((prev) => ({ ...prev, progress: 40, currentStep: 'loading-worker' }))
 
-      // Step 4: Initialize OCR engine
+      // Step 4: Initialize OCR engine (skip for Claude - it's API-based)
       if (currentEngine === 'tesseract') {
         await initializeOCRWorker()
       } else if (currentEngine === 'transformers') {
@@ -83,13 +83,18 @@ export function useOCR(initialEngine: OCREngine = 'tesseract') {
 
       setProcessingState((prev) => ({ ...prev, progress: 50, currentStep: 'extracting' }))
 
-      // Step 5: Extract text using selected engine
-      const ocrResult = await extractText(preprocessedCanvas, currentEngine)
+      // Step 5: Extract and parse license data
+      let licenseData: ExtractedLicenseData
 
-      setProcessingState((prev) => ({ ...prev, progress: 80, currentStep: 'parsing' }))
-
-      // Step 6: Parse license data from OCR result
-      const licenseData = parseLicenseData(ocrResult, side)
+      if (currentEngine === 'claude') {
+        // Claude extracts structured data directly
+        licenseData = await extractLicenseData(preprocessedCanvas, side, currentEngine)
+      } else {
+        // Other engines: extract text then parse
+        const ocrResult = await extractText(preprocessedCanvas, currentEngine)
+        setProcessingState((prev) => ({ ...prev, progress: 80, currentStep: 'parsing' }))
+        licenseData = parseLicenseData(ocrResult, side)
+      }
 
       setProcessingState((prev) => ({ ...prev, progress: 90 }))
 

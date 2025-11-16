@@ -3,6 +3,8 @@
 import { useState, useCallback } from 'react'
 import { Dialog, DialogTitle, DialogDescription, DialogBody, DialogActions } from './dialog'
 import { Button } from './button'
+import { Select } from './select'
+import { Field, Label, Description } from './fieldset'
 import { CameraCapture } from './camera-capture'
 import { FileUpload } from './file-upload'
 import { QualityIndicator, FieldConfidenceIndicator } from './quality-indicator'
@@ -14,6 +16,7 @@ import {
   ArrowUpTrayIcon,
   XMarkIcon,
   CheckIcon,
+  InformationCircleIcon,
 } from '@heroicons/react/24/outline'
 
 interface LicenseCaptureProps {
@@ -119,29 +122,51 @@ export function LicenseCapture({ isOpen, onClose, onDataExtracted }: LicenseCapt
       </DialogDescription>
 
       <DialogBody>
+        {/* Info banner showing what to look for */}
+        <div className="mb-4 rounded-lg bg-blue-50 p-4 dark:bg-blue-950/20">
+          <div className="flex gap-2">
+            <InformationCircleIcon className="h-5 w-5 flex-shrink-0 text-blue-600 dark:text-blue-400" />
+            <div className="text-sm text-blue-900 dark:text-blue-100">
+              <p className="font-semibold mb-2">
+                {currentSide === 'front' ? 'Front Side Information:' : 'Back Side Information:'}
+              </p>
+              {currentSide === 'front' ? (
+                <ul className="space-y-1 text-xs">
+                  <li><strong>TRN (License Number):</strong> 9-digit number labeled "TRN"</li>
+                  <li><strong>Date of Birth:</strong> Located near "EXPIRY DATE" and "SEX" fields</li>
+                  <li><strong>Date Issued:</strong> Look for "DATE ISSUED" label</li>
+                </ul>
+              ) : (
+                <ul className="space-y-1 text-xs">
+                  <li><strong>Control Number:</strong> 10-digit number on the back</li>
+                  <li><strong>Original Date of Issue:</strong> Look for "ORIGINAL DATE OF ISSUE" label</li>
+                </ul>
+              )}
+            </div>
+          </div>
+        </div>
         {/* OCR Engine Selector */}
         {!capturedImage && (
-          <div className="mb-4 rounded-lg border border-zinc-200 bg-white p-4 dark:border-zinc-700 dark:bg-zinc-800">
-            <label htmlFor="ocr-engine" className="block text-sm font-medium text-zinc-900 dark:text-white mb-2">
-              OCR Engine
-            </label>
-            <select
-              id="ocr-engine"
+          <Field>
+            <Label>OCR Engine</Label>
+            <Select
+              name="ocr-engine"
               value={currentEngine}
               onChange={(e) => setCurrentEngine(e.target.value as typeof currentEngine)}
-              className="w-full rounded-md border border-zinc-300 bg-white px-3 py-2 text-sm text-zinc-900 shadow-sm focus:border-blue-500 focus:outline-none focus:ring-1 focus:ring-blue-500 dark:border-zinc-600 dark:bg-zinc-700 dark:text-white"
               disabled={isProcessing}
             >
-              <option value="tesseract">Tesseract (Fast - Recommended)</option>
-              <option value="transformers">Transformers.js (More Accurate - Slower)</option>
-              <option value="auto">Auto (Try Both - Best Result)</option>
-            </select>
-            <p className="mt-2 text-xs text-zinc-500 dark:text-zinc-400">
-              {currentEngine === 'tesseract' && 'Fast processing (~2-3 seconds). Good for clear images.'}
-              {currentEngine === 'transformers' && 'Higher accuracy with AI models (~5-10 seconds). First use requires downloading ~40MB model.'}
-              {currentEngine === 'auto' && 'Tries Transformers first, falls back to Tesseract if needed. Best accuracy.'}
-            </p>
-          </div>
+              <option value="tesseract">Tesseract (Fast - Free)</option>
+              <option value="transformers">Transformers.js (AI Model - Free)</option>
+              <option value="claude">Claude Vision (Best Accuracy - Paid)</option>
+              <option value="auto">Auto (Try Best Available)</option>
+            </Select>
+            <Description>
+              {currentEngine === 'tesseract' && 'Fast processing (~2-3 seconds). Good for clear images. Runs locally.'}
+              {currentEngine === 'transformers' && 'AI model processing (~5-10 seconds). First use requires downloading model. Runs locally.'}
+              {currentEngine === 'claude' && 'Claude Vision API - Highest accuracy with document understanding. Uses API credits (~$0.01 per scan).'}
+              {currentEngine === 'auto' && 'Automatically selects the best available engine. Tries Claude first if API key is configured.'}
+            </Description>
+          </Field>
         )}
 
         {!capturedImage ? (

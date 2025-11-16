@@ -10,10 +10,12 @@
     "generate:og": "bun run scripts/generate-og-images.tsx"
   },
   "dependencies": {
+    "@ai-sdk/anthropic": "^2.0.44",
     "@headlessui/react": "^2.2.9",
     "@heroicons/react": "^2.2.0",
     "@huggingface/transformers": "^3.7.6",
     "@vercel/og": "^0.8.5",
+    "ai": "^5.0.93",
     "clsx": "^2.1.1",
     "motion": "^12.23.24",
     "next": "16.0.1",

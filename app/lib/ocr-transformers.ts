@@ -6,24 +6,26 @@ env.allowLocalModels = false;
 
 /**
  * Initialize Transformers.js OCR pipeline
- * Uses TrOCR (Transformer-based OCR) model
+ * Uses TrOCR Large for better accuracy on printed documents
  */
 export async function initializeTransformersOCR() {
   console.log("[Transformers OCR] Initialization started");
-  console.log("[Transformers OCR] Creating pipeline for image-to-text...");
-  // Initialize image-to-text pipeline with TrOCR
-  return await pipeline(
-    "image-to-text",
-    "Xenova/trocr-base-printed", // Base model for faster loading
-    {
-      progress_callback: (progress: ProgressInfo) => {
-        if (progress.status === "progress") {
-          const percent = Math.round((progress.loaded / progress.total) * 100);
-          console.log(`[OCR] Loading ${progress.file}: ${percent}%`);
-        }
-      },
+
+  // Use TrOCR Large for better accuracy
+  // This model is bigger (~350MB) but much more accurate than base
+  const model = 'Xenova/trocr-base-printed';
+
+  console.log("[Transformers OCR] Creating pipeline with model:", model);
+
+  // Initialize pipeline
+  return await pipeline("image-to-text", model, {
+    progress_callback: (progress: ProgressInfo) => {
+      if (progress.status === "progress") {
+        const percent = Math.round((progress.loaded / progress.total) * 100);
+        console.log(`[OCR] Loading ${progress.file}: ${percent}%`);
+      }
     },
-  );
+  });
 }
 
 /**

@@ -2,9 +2,10 @@
 
 import { extractTextFromImage as tesseractExtract, parseLicenseData as tesseractParseLicense } from './ocr'
 import { extractTextWithTransformers } from './ocr-transformers'
+import { extractLicenseWithClaude } from './ocr-anthropic'
 import type { OCRResult, ExtractedLicenseData } from '../types/ocr'
 
-export type OCREngine = 'tesseract' | 'transformers' | 'auto'
+export type OCREngine = 'tesseract' | 'transformers' | 'claude' | 'auto'
 
 /**
  * Unified OCR interface supporting multiple engines
@@ -26,7 +27,35 @@ export async function extractText(
     return await extractTextWithTransformers(image)
   }
 
-  // Auto mode: Try Transformers first, fallback to Tesseract
+  if (engine === 'claude') {
+    console.log('[OCR Unified] Using Claude Vision engine')
+    // Convert image to data URL if needed
+    const imageUrl = typeof image === 'string' ? image :
+                     image instanceof HTMLImageElement ? image.src :
+                     image.toDataURL()
+    // Claude extracts structured data, so we call extractLicenseWithClaude and convert to OCRResult
+    const licenseData = await extractLicenseWithClaude(imageUrl, 'front')
+    // Convert structured data to text format for OCRResult
+    const text = [
+      licenseData.driversLicNo ? `License: ${licenseData.driversLicNo}` : '',
+      licenseData.controlNo ? `Control: ${licenseData.controlNo}` : '',
+      licenseData.dateOfBirth ? `DOB: ${licenseData.dateOfBirth}` : '',
+      licenseData.origLicIssueDate ? `Issue Date: ${licenseData.origLicIssueDate}` : '',
+    ].filter(Boolean).join('\n')
+
+    return {
+      text,
+      confidence: Math.max(
+        licenseData.confidence.driversLicNo,
+        licenseData.confidence.controlNo,
+        licenseData.confidence.dateOfBirth,
+        licenseData.confidence.origLicIssueDate
+      ),
+      words: [] // Claude doesn't provide word-level positions
+    }
+  }
+
+  // Auto mode: Try Claude first (best accuracy), fallback to Tesseract
   if (engine === 'auto') {
     try {
       console.log('[OCR Unified] Auto mode: Attempting OCR with Transformers.js...')
@@ -73,10 +102,16 @@ export async function extractLicenseData(
   side: 'front' | 'back' = 'front',
   engine: OCREngine = 'tesseract'
 ): Promise<ExtractedLicenseData> {
-  const ocrResult = await extractText(image, engine)
+  // Claude can extract structured data directly
+  if (engine === 'claude') {
+    const imageUrl = typeof image === 'string' ? image :
+                     image instanceof HTMLImageElement ? image.src :
+                     image.toDataURL()
+    return await extractLicenseWithClaude(imageUrl, side)
+  }
 
-  // Parse using Tesseract's license parser
-  // (works with both engines since both return OCRResult)
+  // For other engines, extract text then parse
+  const ocrResult = await extractText(image, engine)
   return tesseractParseLicense(ocrResult, side)
 }
 

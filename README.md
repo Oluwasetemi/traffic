@@ -6,6 +6,12 @@ A modern, full-stack web application for looking up and managing traffic tickets
 
 ## Features
 
+- **OCR License Scanning**: Automatically extract information from Jamaica driver's license photos using AI
+  - Multiple OCR engines: Tesseract.js, Transformers.js, and Claude Vision
+  - Camera capture or file upload
+  - Two-sided scanning (front and back of license)
+  - Real-time quality feedback
+  - Auto-fill form with extracted data
 - **License Validation**: Verify driver's license information against the official database
 - **Interactive Dashboard**: Visualize ticket statistics with charts and graphs
 - **Ticket Management**: View outstanding and paid tickets with detailed information
@@ -22,6 +28,11 @@ A modern, full-stack web application for looking up and managing traffic tickets
 - **Icons**: Heroicons
 - **Animations**: Motion (Framer Motion)
 - **Language**: TypeScript
+- **OCR Engines**:
+  - Tesseract.js v6 - Free, browser-based OCR
+  - Transformers.js - AI models running in the browser
+  - Claude Vision (Anthropic) - AI API for highest accuracy
+- **AI SDK**: Vercel AI SDK with Anthropic provider
 
 ## Getting Started
 
@@ -50,7 +61,14 @@ bun install
 cp .env.example .env.local
 ```
 
-4. Run the development server:
+4. (Optional) Configure Claude Vision OCR:
+```bash
+# Edit .env.local and add your Anthropic API key
+ANTHROPIC_API_KEY=your_api_key_here
+```
+Get your API key from [Anthropic Console](https://console.anthropic.com/settings/keys)
+
+5. Run the development server:
 ```bash
 npm run dev
 # or

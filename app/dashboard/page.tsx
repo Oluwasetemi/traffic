@@ -19,10 +19,6 @@ import { Heading } from '../components/heading'
 import { Divider } from '../components/divider'
 import { Text } from '../components/text'
 import {
-  ExclamationCircleIcon,
-  CheckCircleIcon,
-  CurrencyDollarIcon,
-  DocumentTextIcon,
   ExclamationTriangleIcon,
 } from '@heroicons/react/24/outline'
 import type { TicketSearchResponse } from '../types'
@@ -68,7 +64,7 @@ export default function DashboardPage() {
         setData(ticketData)
         setIsRealData(false)
       }
-    } catch (error) {
+    } catch (error: unknown) {
       // Silently fall back to no data - user will see empty state
     } finally {
       setIsLoading(false)
@@ -176,73 +172,68 @@ export default function DashboardPage() {
         </div>
 
         {/* Statistics Cards */}
-        <div className="grid grid-cols-1 gap-6 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-5 mb-12">
-          <div className="rounded-2xl bg-white dark:bg-zinc-900 p-6 ring-1 ring-zinc-950/5 dark:ring-white/10">
-            <div className="flex items-center gap-4">
-              <div className="flex size-12 items-center justify-center rounded-lg bg-blue-100 dark:bg-blue-950">
-                <DocumentTextIcon className="size-6 text-blue-600 dark:text-blue-400" />
-              </div>
-              <div>
-                <p className="text-sm text-zinc-600 dark:text-zinc-400">Total Tickets</p>
-                <p className="text-2xl font-bold text-zinc-950 dark:text-white">{data?.totalTickets || 0}</p>
-              </div>
-            </div>
+        <dl className="rounded-2xl border dark:border-white/5 mx-auto grid grid-cols-1 gap-px bg-gray-900/5 sm:grid-cols-2 lg:grid-cols-5 mb-12 dark:bg-white/10">
+          {/* Total Tickets */}
+          <div className="flex flex-wrap items-baseline justify-between gap-x-4 gap-y-2 bg-white px-4 py-10 sm:px-6 xl:px-8 dark:bg-zinc-900 rounded-t-2xl border-transparent border dark:border-white/5 sm:rounded-none sm:rounded-tl-2xl lg:rounded-none lg:rounded-l-2xl">
+            <dt className="text-sm/6 font-medium text-gray-500 dark:text-gray-400">Total Tickets</dt>
+            <dd className="text-xs font-medium text-gray-700 dark:text-gray-300">
+              {data?.totalTickets || 0} total
+            </dd>
+            <dd className="w-full flex-none text-3xl/10 font-medium tracking-tight text-gray-900 dark:text-white">
+              {data?.totalTickets || 0}
+            </dd>
           </div>
 
-          <div className="rounded-2xl bg-white dark:bg-zinc-900 p-6 ring-1 ring-zinc-950/5 dark:ring-white/10">
-            <div className="flex items-center gap-4">
-              <div className="flex size-12 items-center justify-center rounded-lg bg-red-100 dark:bg-red-950">
-                <ExclamationCircleIcon className="size-6 text-red-600 dark:text-red-400" />
-              </div>
-              <div>
-                <p className="text-sm text-zinc-600 dark:text-zinc-400">Outstanding</p>
-                <p className="text-2xl font-bold text-zinc-950 dark:text-white">{data?.outstanding || 0}</p>
-              </div>
-            </div>
+          {/* Outstanding */}
+          <div className="flex flex-wrap items-baseline justify-between gap-x-4 gap-y-2 bg-white px-4 py-10 sm:px-6 xl:px-8 dark:bg-zinc-900 sm:rounded-none sm:rounded-tr-2xl lg:rounded-none">
+            <dt className="text-sm/6 font-medium text-gray-500 dark:text-gray-400">Outstanding</dt>
+            <dd className="text-xs font-medium text-rose-600 dark:text-rose-400">
+              {data?.outstanding || 0} unpaid
+            </dd>
+            <dd className="w-full flex-none text-3xl/10 font-medium tracking-tight text-gray-900 dark:text-white">
+              {data?.outstanding || 0}
+            </dd>
           </div>
 
-          <div className="rounded-2xl bg-white dark:bg-zinc-900 p-6 ring-1 ring-zinc-950/5 dark:ring-white/10">
-            <div className="flex items-center gap-4">
-              <div className="flex size-12 items-center justify-center rounded-lg bg-green-100 dark:bg-green-950">
-                <CheckCircleIcon className="size-6 text-green-600 dark:text-green-400" />
-              </div>
-              <div>
-                <p className="text-sm text-zinc-600 dark:text-zinc-400">Paid</p>
-                <p className="text-2xl font-bold text-zinc-950 dark:text-white">
-                  {(data?.totalTickets || 0) - (data?.outstanding || 0)}
-                </p>
-              </div>
-            </div>
+          {/* Paid */}
+          <div className="flex flex-wrap items-baseline justify-between gap-x-4 gap-y-2 bg-white px-4 py-10 sm:px-6 xl:px-8 dark:bg-zinc-900">
+            <dt className="text-sm/6 font-medium text-gray-500 dark:text-gray-400">Paid</dt>
+            <dd className="text-xs font-medium text-gray-700 dark:text-gray-300">
+              {((data?.totalTickets || 0) - (data?.outstanding || 0))} settled
+            </dd>
+            <dd className="w-full flex-none text-3xl/10 font-medium tracking-tight text-gray-900 dark:text-white">
+              {(data?.totalTickets || 0) - (data?.outstanding || 0)}
+            </dd>
           </div>
 
-          <div className="rounded-2xl bg-white dark:bg-zinc-900 p-6 ring-1 ring-zinc-950/5 dark:ring-white/10">
-            <div className="flex items-center gap-4">
-              <div className="flex size-12 items-center justify-center rounded-lg bg-orange-100 dark:bg-orange-950">
-                <CurrencyDollarIcon className="size-6 text-orange-600 dark:text-orange-400" />
-              </div>
-              <div>
-                <p className="text-sm text-zinc-600 dark:text-zinc-400">Total Owed</p>
-                <p className="text-2xl font-bold text-zinc-950 dark:text-white">
-                  {formatCurrency(data?.totalOutstanding || 0)}
-                </p>
-              </div>
-            </div>
+          {/* Total Owed */}
+          <div className="flex flex-wrap items-baseline justify-between gap-x-4 gap-y-2 bg-white px-4 py-10 sm:px-6 xl:px-8 dark:bg-zinc-900">
+            <dt className="text-sm/6 font-medium text-gray-500 dark:text-gray-400">Total Owed</dt>
+            <dd className="text-xs font-medium text-rose-600 dark:text-rose-400">
+              {data?.outstanding || 0} tickets
+            </dd>
+            <dd className="w-full flex-none text-3xl/10 font-medium tracking-tight text-gray-900 dark:text-white">
+              {formatCurrency(data?.totalOutstanding || 0)}
+            </dd>
           </div>
 
-          <div className="rounded-2xl bg-white dark:bg-zinc-900 p-6 ring-1 ring-zinc-950/5 dark:ring-white/10">
-            <div className="flex items-center gap-4">
-              <div className="flex size-12 items-center justify-center rounded-lg bg-yellow-100 dark:bg-yellow-950">
-                <ExclamationTriangleIcon className="size-6 text-yellow-600 dark:text-yellow-400" />
-              </div>
-              <div>
-                <p className="text-sm text-zinc-600 dark:text-zinc-400">Demerit Points</p>
-                <p className="text-2xl font-bold text-zinc-950 dark:text-white">
-                  {data?.tickets?.reduce((sum, ticket) => sum + (ticket.demeritPoints || 0), 0) || 0}
-                </p>
-              </div>
-            </div>
+          {/* Demerit Points */}
+          <div className="flex flex-wrap items-baseline justify-between gap-x-4 gap-y-2 bg-white px-4 py-10 sm:px-6 xl:px-8 dark:bg-zinc-900   border-transparent rounded-b-2xl dark:border-white/5 sm:rounded-none sm:rounded-bl-2xl lg:rounded-none lg:rounded-r-2xl">
+            <dt className="text-sm/6 font-medium text-gray-500 dark:text-gray-400">Demerit Points</dt>
+            <dd className={`text-xs font-medium ${
+              (data?.tickets?.reduce((sum, ticket) => sum + (ticket.demeritPoints || 0), 0) || 0) >= 10
+                ? 'text-rose-600 dark:text-rose-400'
+                : 'text-gray-700 dark:text-gray-300'
+            }`}>
+              {(data?.tickets?.reduce((sum, ticket) => sum + (ticket.demeritPoints || 0), 0) || 0) >= 10
+                ? 'At risk'
+                : 'Safe'}
+            </dd>
+            <dd className="w-full flex-none text-3xl/10 font-medium tracking-tight text-gray-900 dark:text-white">
+              {data?.tickets?.reduce((sum, ticket) => sum + (ticket.demeritPoints || 0), 0) || 0}
+            </dd>
           </div>
-        </div>
+        </dl>
 
         {/* Filter Tabs */}
         <div className="mb-6">

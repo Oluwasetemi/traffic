@@ -2,7 +2,7 @@
 
 import { useState } from "react";
 import { Heading } from "../components/heading";
-import { Text } from "../components/text";
+import { Text, Strong } from "../components/text";
 import { Input } from "../components/input";
 import {
   Table,
@@ -439,9 +439,9 @@ export default function OffencesPage() {
         <div className="mt-8 space-y-4">
           <div className="rounded-xl bg-blue-50 dark:bg-blue-950/20 p-6">
             <p className="text-sm text-zinc-700 dark:text-zinc-300">
-              <strong className="font-semibold text-zinc-950 dark:text-white">
+              <Strong className="font-semibold">
                 Important:
-              </strong>{" "}
+              </Strong>{" "}
               Points expire after 15 months if you stay below 10 points.
               Camera-detected violations carry financial penalties only (no
               points). You have 21 days to pay fines before they convert to
@@ -449,7 +449,7 @@ export default function OffencesPage() {
               charges with automatic suspension.
             </p>
           </div>
-
+          
           <Disclaimer type="offences" />
         </div>
       </main>

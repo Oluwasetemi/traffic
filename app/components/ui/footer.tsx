@@ -15,7 +15,7 @@ export default function Footer() {
               rel="noopener noreferrer"
               className="font-semibold"
             >
-              Oluwasetemi Ojo
+              Oluwasetemi Ojo (Code Factory)
             </Link>
           </div>
 
@@ -31,11 +31,11 @@ export default function Footer() {
             <span className="text-zinc-300 dark:text-zinc-700">|</span>
 
             <Link
-              href="mailto:hello@oluwasetemi.dev"
+              href="mailto:me@oluwasetemi.dev"
               className="inline-flex items-center gap-1"
             >
               <EnvelopeIcon className="w-4 h-4" />
-              hello@oluwasetemi.dev
+              me@oluwasetemi.dev
             </Link>
 
             <span className="text-zinc-300 dark:text-zinc-700">|</span>

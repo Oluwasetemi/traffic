@@ -6,6 +6,36 @@ import { StackedLayout } from "./components/stacked-layout";
 import { AppNavbar } from "./components/app-navbar";
 import { AppSidebar } from "./components/app-sidebar";
 import Footer from "./components/ui/footer";
+import { Bricolage_Grotesque, DM_Sans, JetBrains_Mono, Inter } from 'next/font/google';
+
+// Font configurations
+const bricolageGrotesque = Bricolage_Grotesque({
+  subsets: ['latin'],
+  variable: '--font-display',
+  weight: ['400', '500', '600', '700', '800'],
+  display: 'swap',
+});
+
+const dmSans = DM_Sans({
+  subsets: ['latin'],
+  variable: '--font-body',
+  weight: ['400', '500', '600', '700'],
+  display: 'swap',
+});
+
+const jetbrainsMono = JetBrains_Mono({
+  subsets: ['latin'],
+  variable: '--font-mono',
+  weight: ['400', '500', '600'],
+  display: 'swap',
+});
+
+const inter = Inter({
+  subsets: ['latin'],
+  variable: '--font-accent',
+  weight: ['400', '500', '600', '700'],
+  display: 'swap',
+});
 
 const baseUrl =
   process.env.NEXT_PUBLIC_BASE_URL ||
@@ -49,9 +79,12 @@ export default function RootLayout({
 }>) {
   return (
     <ViewTransitions>
-      <html lang="en" suppressHydrationWarning>
+      <html
+        lang="en"
+        suppressHydrationWarning
+        className={`${bricolageGrotesque.variable} ${dmSans.variable} ${jetbrainsMono.variable} ${inter.variable}`}
+      >
         <head>
-          <link rel="stylesheet" href="https://rsms.me/inter/inter.css" />
           <script
             dangerouslySetInnerHTML={{
               __html: `
@@ -65,7 +98,11 @@ export default function RootLayout({
             }}
           />
         </head>
-        <body className="antialiased">
+        <body className={`antialiased ${dmSans.className}`}>
+          {/* Jamaica Flag Accent Bar */}
+          <div className="jamaica-flag-accent">
+            <span></span>
+          </div>
           <ThemeProvider>
             <StackedLayout navbar={<AppNavbar />} sidebar={<AppSidebar />}>
               {children}

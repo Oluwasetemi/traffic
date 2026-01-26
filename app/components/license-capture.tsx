@@ -284,7 +284,7 @@ export function LicenseCapture({
             {isProcessing && (
               <div className="rounded-lg bg-blue-50 p-4 dark:bg-blue-950/20">
                 <div className="flex items-center space-x-3">
-                  <div className="h-5 w-5 animate-spin rounded-full border-2 border-blue-600 border-t-transparent dark:border-blue-400"></div>
+                  <div className="h-5 w-5 animate-spin motion-reduce:animate-none rounded-full border-2 border-blue-600 border-t-transparent dark:border-blue-400"></div>
                   <div className="flex-1">
                     <p className="text-sm font-medium text-blue-900 dark:text-blue-100">
                       {getProgressMessage()}

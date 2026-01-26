@@ -2,8 +2,7 @@
 
 import * as Headless from '@headlessui/react'
 import clsx from 'clsx'
-import { LayoutGroup, motion } from 'motion/react'
-import React, { forwardRef, useId } from 'react'
+import React, { forwardRef } from 'react'
 import { TouchTarget } from './button'
 import { Link } from './link'
 
@@ -16,13 +15,7 @@ export function NavbarDivider({ className, ...props }: React.ComponentPropsWitho
 }
 
 export function NavbarSection({ className, ...props }: React.ComponentPropsWithoutRef<'div'>) {
-  const id = useId()
-
-  return (
-    <LayoutGroup id={id}>
-      <div {...props} className={clsx(className, 'flex items-center gap-3')} />
-    </LayoutGroup>
-  )
+  return <div {...props} className={clsx(className, 'flex items-center gap-3')} />
 }
 
 export function NavbarSpacer({ className, ...props }: React.ComponentPropsWithoutRef<'div'>) {
@@ -63,10 +56,7 @@ export const NavbarItem = forwardRef(function NavbarItem(
   return (
     <span className={clsx(className, 'relative')}>
       {current && (
-        <motion.span
-          layoutId="current-indicator"
-          className="absolute inset-x-2 -bottom-2.5 h-0.5 rounded-full bg-zinc-950 dark:bg-white"
-        />
+        <span className="absolute inset-x-2 -bottom-2.5 h-0.5 rounded-full bg-zinc-950 dark:bg-white transition-all duration-200" />
       )}
       {'href' in props ? (
         <Link

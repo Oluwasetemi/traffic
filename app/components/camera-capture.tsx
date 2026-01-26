@@ -71,7 +71,7 @@ export function CameraCapture({ onCapture, disabled }: CameraCaptureProps) {
         {!isReady && (
           <div className="absolute inset-0 flex items-center justify-center bg-zinc-100 dark:bg-zinc-800">
             <div className="text-center">
-              <div className="mx-auto mb-4 h-12 w-12 animate-spin rounded-full border-4 border-zinc-300 border-t-blue-600 dark:border-zinc-600 dark:border-t-blue-400"></div>
+              <div className="mx-auto mb-4 h-12 w-12 animate-spin motion-reduce:animate-none rounded-full border-4 border-zinc-300 border-t-blue-600 dark:border-zinc-600 dark:border-t-blue-400"></div>
               <p className="text-sm text-zinc-600 dark:text-zinc-400">
                 Initializing camera...
               </p>
@@ -82,8 +82,7 @@ export function CameraCapture({ onCapture, disabled }: CameraCaptureProps) {
         {/* Guide overlay */}
         {isReady && (
           <div className="pointer-events-none absolute inset-0 flex items-center justify-center">
-            <div className="rounded-lg border-4 border-dashed border-white/70 p-4 dark:border-zinc-300/70"
-                 style={{ width: '85%', aspectRatio: '1.586' }}>
+            <div className="w-[85%] aspect-license rounded-lg border-4 border-dashed border-white/70 p-4 dark:border-zinc-300/70">
               <p className="text-center text-sm font-medium text-white drop-shadow-lg dark:text-zinc-100">
                 Align license within frame
               </p>

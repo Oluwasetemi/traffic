@@ -1,6 +1,6 @@
 'use client'
 
-import { useEffect, useState } from 'react'
+import { useEffect, useState, useMemo, useCallback } from 'react'
 import { Badge } from '../components/badge'
 import {
   Table,
@@ -71,35 +71,51 @@ export default function DashboardPage() {
     }
   }
 
-  const filteredTickets = data?.tickets?.filter((ticket) => {
-    if (filter === 'all') return true
-    if (filter === 'outstanding') return ticket.status.toLowerCase() === 'outstanding'
-    if (filter === 'paid') return ticket.status.toLowerCase() === 'paid'
-    return true
-  }) || []
+  // Memoize filtered tickets to prevent recalculation on every render
+  const filteredTickets = useMemo(() =>
+    data?.tickets?.filter((ticket) => {
+      if (filter === 'all') return true
+      if (filter === 'outstanding') return ticket.status.toLowerCase() === 'outstanding'
+      if (filter === 'paid') return ticket.status.toLowerCase() === 'paid'
+      return true
+    }) || [],
+    [data?.tickets, filter]
+  )
 
-  const formatCurrency = (amount: number) => {
-    const formatted = new Intl.NumberFormat('en-JM', {
+  // Memoize total demerit points calculation
+  const totalDemeritPoints = useMemo(() =>
+    data?.tickets?.reduce((sum, ticket) => sum + (ticket.demeritPoints || 0), 0) || 0,
+    [data?.tickets]
+  )
+
+  // Memoize currency formatter to prevent recreation on every call
+  const currencyFormatter = useMemo(() =>
+    new Intl.NumberFormat('en-JM', {
       style: 'currency',
       currency: 'JMD',
-    }).format(amount)
+    }),
+    []
+  )
+
+  const formatCurrency = useCallback((amount: number) => {
+    const formatted = currencyFormatter.format(amount)
     // Replace $ with JMD to show currency code
     return formatted.replace('$', 'JMD $')
-  }
+  }, [currencyFormatter])
 
-  const formatDate = (dateString: string) => {
+  const formatDate = useCallback((dateString: string) => {
     return new Date(dateString).toLocaleDateString('en-JM', {
       year: 'numeric',
       month: 'long',
       day: 'numeric',
     })
-  }
+  }, [])
 
   if (isLoading) {
     return (
-      <div className="min-h-screen flex items-center justify-center">
+      <div className="min-h-screen flex items-center justify-center" role="status" aria-live="polite">
         <div className="text-center">
-          <div className="inline-block size-12 animate-spin rounded-full border-4 border-solid border-blue-600 border-r-transparent"></div>
+          <div className="inline-block size-12 animate-spin motion-reduce:animate-none rounded-full border-4 border-solid border-blue-600 border-r-transparent"></div>
           <p className="mt-4 text-zinc-600 dark:text-zinc-400">Loading tickets...</p>
         </div>
       </div>
@@ -111,7 +127,7 @@ export default function DashboardPage() {
       <main className="mx-auto max-w-7xl px-6 py-12 lg:px-8">
         <div className="mb-12">
           <div className="flex items-center gap-3">
-            <Heading>Traffic Ticket Dashboard</Heading>
+            <Heading className="font-display">Traffic Ticket Dashboard</Heading>
             <Badge color={isRealData ? 'green' : 'amber'}>
               {isRealData ? 'Live Data' : 'Demo Mode'}
             </Badge>
@@ -123,10 +139,9 @@ export default function DashboardPage() {
           </Text>
           {data && data.tickets && data.tickets.length > 0 && (
             <div className="mt-6">
-              {/* Suspension Warning */}
+              {/* Suspension Warning - Using memoized totalDemeritPoints */}
               {(() => {
-                const totalPoints = data.tickets.reduce((sum, ticket) => sum + (ticket.demeritPoints || 0), 0)
-                if (totalPoints >= 10) {
+                if (totalDemeritPoints >= 10) {
                   return (
                     <div className="rounded-xl bg-red-50 dark:bg-red-950/20 p-4 border border-red-200 dark:border-red-900">
                       <div className="flex gap-3">
@@ -136,18 +151,18 @@ export default function DashboardPage() {
                             License Suspension Risk
                           </p>
                           <p className="text-sm text-red-700 dark:text-red-300 mt-1">
-                            {totalPoints >= 20
-                              ? `You have ${totalPoints} demerit points. This triggers a 2-year suspension and requires competency retesting.`
-                              : totalPoints >= 14
-                              ? `You have ${totalPoints} demerit points. This triggers a 1-year license suspension.`
-                              : `You have ${totalPoints} demerit points. This triggers a 6-month license suspension.`}
+                            {totalDemeritPoints >= 20
+                              ? `You have ${totalDemeritPoints} demerit points. This triggers a 2-year suspension and requires competency retesting.`
+                              : totalDemeritPoints >= 14
+                              ? `You have ${totalDemeritPoints} demerit points. This triggers a 1-year license suspension.`
+                              : `You have ${totalDemeritPoints} demerit points. This triggers a 6-month license suspension.`}
                             {' '}You must surrender your license within 21 days of notice.
                           </p>
                         </div>
                       </div>
                     </div>
                   )
-                } else if (totalPoints >= 7) {
+                } else if (totalDemeritPoints >= 7) {
                   return (
                     <div className="rounded-xl bg-yellow-50 dark:bg-yellow-950/20 p-4 border border-yellow-200 dark:border-yellow-900">
                       <div className="flex gap-3">
@@ -157,7 +172,7 @@ export default function DashboardPage() {
                             Approaching Suspension Threshold
                           </p>
                           <p className="text-sm text-yellow-700 dark:text-yellow-300 mt-1">
-                            You have {totalPoints} demerit points. At 10 points, your license will be suspended for 6 months.
+                            You have {totalDemeritPoints} demerit points. At 10 points, your license will be suspended for 6 months.
                             Points expire after 15 months if you stay below 10.
                           </p>
                         </div>
@@ -174,63 +189,63 @@ export default function DashboardPage() {
         {/* Statistics Cards */}
         <dl className="rounded-2xl border dark:border-white/5 mx-auto grid grid-cols-1 gap-px bg-gray-900/5 sm:grid-cols-2 lg:grid-cols-5 mb-12 dark:bg-white/10">
           {/* Total Tickets */}
-          <div className="flex flex-wrap items-baseline justify-between gap-x-4 gap-y-2 bg-white px-4 py-10 sm:px-6 xl:px-8 dark:bg-zinc-900 rounded-t-2xl border-transparent border dark:border-white/5 sm:rounded-none sm:rounded-tl-2xl lg:rounded-none lg:rounded-l-2xl">
+          <div className="hover-lift flex flex-wrap items-baseline justify-between gap-x-4 gap-y-2 bg-white px-4 py-10 sm:px-6 xl:px-8 dark:bg-zinc-900 rounded-t-2xl border-transparent border dark:border-white/5 sm:rounded-none sm:rounded-tl-2xl lg:rounded-none lg:rounded-l-2xl">
             <dt className="text-sm/6 font-medium text-gray-500 dark:text-gray-400">Total Tickets</dt>
             <dd className="text-xs font-medium text-gray-700 dark:text-gray-300">
               {data?.totalTickets || 0} total
             </dd>
-            <dd className="w-full flex-none text-3xl/10 font-medium tracking-tight text-gray-900 dark:text-white">
+            <dd className="w-full flex-none text-3xl/10 font-medium tracking-tight text-gray-900 dark:text-white font-mono-custom">
               {data?.totalTickets || 0}
             </dd>
           </div>
 
           {/* Outstanding */}
-          <div className="flex flex-wrap items-baseline justify-between gap-x-4 gap-y-2 bg-white px-4 py-10 sm:px-6 xl:px-8 dark:bg-zinc-900 sm:rounded-none sm:rounded-tr-2xl lg:rounded-none">
+          <div className="hover-lift flex flex-wrap items-baseline justify-between gap-x-4 gap-y-2 bg-white px-4 py-10 sm:px-6 xl:px-8 dark:bg-zinc-900 sm:rounded-none sm:rounded-tr-2xl lg:rounded-none">
             <dt className="text-sm/6 font-medium text-gray-500 dark:text-gray-400">Outstanding</dt>
             <dd className="text-xs font-medium text-rose-600 dark:text-rose-400">
               {data?.outstanding || 0} unpaid
             </dd>
-            <dd className="w-full flex-none text-3xl/10 font-medium tracking-tight text-gray-900 dark:text-white">
+            <dd className="w-full flex-none text-3xl/10 font-medium tracking-tight text-gray-900 dark:text-white font-mono-custom">
               {data?.outstanding || 0}
             </dd>
           </div>
 
           {/* Paid */}
-          <div className="flex flex-wrap items-baseline justify-between gap-x-4 gap-y-2 bg-white px-4 py-10 sm:px-6 xl:px-8 dark:bg-zinc-900">
+          <div className="hover-lift flex flex-wrap items-baseline justify-between gap-x-4 gap-y-2 bg-white px-4 py-10 sm:px-6 xl:px-8 dark:bg-zinc-900">
             <dt className="text-sm/6 font-medium text-gray-500 dark:text-gray-400">Paid</dt>
             <dd className="text-xs font-medium text-gray-700 dark:text-gray-300">
               {((data?.totalTickets || 0) - (data?.outstanding || 0))} settled
             </dd>
-            <dd className="w-full flex-none text-3xl/10 font-medium tracking-tight text-gray-900 dark:text-white">
+            <dd className="w-full flex-none text-3xl/10 font-medium tracking-tight text-gray-900 dark:text-white font-mono-custom">
               {(data?.totalTickets || 0) - (data?.outstanding || 0)}
             </dd>
           </div>
 
           {/* Total Owed */}
-          <div className="flex flex-wrap items-baseline justify-between gap-x-4 gap-y-2 bg-white px-4 py-10 sm:px-6 xl:px-8 dark:bg-zinc-900">
+          <div className="hover-lift flex flex-wrap items-baseline justify-between gap-x-4 gap-y-2 bg-white px-4 py-10 sm:px-6 xl:px-8 dark:bg-zinc-900">
             <dt className="text-sm/6 font-medium text-gray-500 dark:text-gray-400">Total Owed</dt>
             <dd className="text-xs font-medium text-rose-600 dark:text-rose-400">
               {data?.outstanding || 0} tickets
             </dd>
-            <dd className="w-full flex-none text-3xl/10 font-medium tracking-tight text-gray-900 dark:text-white">
+            <dd className="w-full flex-none text-3xl/10 font-medium tracking-tight text-gray-900 dark:text-white font-mono-custom">
               {formatCurrency(data?.totalOutstanding || 0)}
             </dd>
           </div>
 
           {/* Demerit Points */}
-          <div className="flex flex-wrap items-baseline justify-between gap-x-4 gap-y-2 bg-white px-4 py-10 sm:px-6 xl:px-8 dark:bg-zinc-900   border-transparent rounded-b-2xl dark:border-white/5 sm:rounded-none sm:rounded-bl-2xl lg:rounded-none lg:rounded-r-2xl">
+          <div className="hover-lift flex flex-wrap items-baseline justify-between gap-x-4 gap-y-2 bg-white px-4 py-10 sm:px-6 xl:px-8 dark:bg-zinc-900   border-transparent rounded-b-2xl dark:border-white/5 sm:rounded-none sm:rounded-bl-2xl lg:rounded-none lg:rounded-r-2xl">
             <dt className="text-sm/6 font-medium text-gray-500 dark:text-gray-400">Demerit Points</dt>
             <dd className={`text-xs font-medium ${
-              (data?.tickets?.reduce((sum, ticket) => sum + (ticket.demeritPoints || 0), 0) || 0) >= 10
+              totalDemeritPoints >= 10
                 ? 'text-rose-600 dark:text-rose-400'
                 : 'text-gray-700 dark:text-gray-300'
             }`}>
-              {(data?.tickets?.reduce((sum, ticket) => sum + (ticket.demeritPoints || 0), 0) || 0) >= 10
+              {totalDemeritPoints >= 10
                 ? 'At risk'
                 : 'Safe'}
             </dd>
-            <dd className="w-full flex-none text-3xl/10 font-medium tracking-tight text-gray-900 dark:text-white">
-              {data?.tickets?.reduce((sum, ticket) => sum + (ticket.demeritPoints || 0), 0) || 0}
+            <dd className="w-full flex-none text-3xl/10 font-medium tracking-tight text-gray-900 dark:text-white font-mono-custom">
+              {totalDemeritPoints}
             </dd>
           </div>
         </dl>
@@ -239,30 +254,33 @@ export default function DashboardPage() {
         <div className="mb-6">
           <div className="flex gap-2">
             <button
+              type="button"
               onClick={() => setFilter('all')}
-              className={`px-4 py-2 rounded-lg font-medium text-sm transition-colors ${
+              className={`px-4 py-2 rounded-lg font-medium text-sm transition-all duration-300 hover-lift ${
                 filter === 'all'
-                  ? 'bg-blue-600 text-white'
+                  ? 'bg-gradient-to-r from-[#009B3A] to-[#FFC72C] text-white'
                   : 'bg-zinc-100 dark:bg-zinc-800 text-zinc-700 dark:text-zinc-300 hover:bg-zinc-200 dark:hover:bg-zinc-700'
               }`}
             >
               All Tickets
             </button>
             <button
+              type="button"
               onClick={() => setFilter('outstanding')}
-              className={`px-4 py-2 rounded-lg font-medium text-sm transition-colors ${
+              className={`px-4 py-2 rounded-lg font-medium text-sm transition-all duration-300 hover-lift ${
                 filter === 'outstanding'
-                  ? 'bg-blue-600 text-white'
+                  ? 'bg-gradient-to-r from-[#009B3A] to-[#FFC72C] text-white'
                   : 'bg-zinc-100 dark:bg-zinc-800 text-zinc-700 dark:text-zinc-300 hover:bg-zinc-200 dark:hover:bg-zinc-700'
               }`}
             >
               Outstanding
             </button>
             <button
+              type="button"
               onClick={() => setFilter('paid')}
-              className={`px-4 py-2 rounded-lg font-medium text-sm transition-colors ${
+              className={`px-4 py-2 rounded-lg font-medium text-sm transition-all duration-300 hover-lift ${
                 filter === 'paid'
-                  ? 'bg-blue-600 text-white'
+                  ? 'bg-gradient-to-r from-[#009B3A] to-[#FFC72C] text-white'
                   : 'bg-zinc-100 dark:bg-zinc-800 text-zinc-700 dark:text-zinc-300 hover:bg-zinc-200 dark:hover:bg-zinc-700'
               }`}
             >

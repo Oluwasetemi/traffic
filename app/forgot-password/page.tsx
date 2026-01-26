@@ -14,7 +14,8 @@ export default function ForgotPasswordPage() {
   const [isLoading, setIsLoading] = useState(false)
   const [isSuccess, setIsSuccess] = useState(false)
   const [error, setError] = useState<string | null>(null)
-  const [fieldErrors, setFieldErrors] = useState<Map<string, string>>(new Map())
+  // Use lazy initialization to avoid creating new Map on every render
+  const [fieldErrors, setFieldErrors] = useState<Map<string, string>>(() => new Map())
   const [email, setEmail] = useState('')
 
   const validateEmail = (value: string): string | null => {

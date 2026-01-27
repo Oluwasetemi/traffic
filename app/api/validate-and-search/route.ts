@@ -1,5 +1,5 @@
 import { NextRequest, NextResponse } from 'next/server'
-import type { DriverLicenseValidationRequest, TrafficTicket } from '@/app/types'
+import type { DriverLicenseValidationRequest, TrafficTicket, ExternalTicket } from '@/app/types'
 
 /**
  * Combined API route that validates license AND searches for tickets in one request.
@@ -168,7 +168,7 @@ export async function POST(request: NextRequest) {
     const ticketsData = await ticketsResponse.json()
 
     // Transform the response to match our expected format
-    let rawTickets = [] as TrafficTicket[]
+    let rawTickets: ExternalTicket[] = []
 
     if (Array.isArray(ticketsData)) {
       rawTickets = ticketsData
@@ -178,27 +178,53 @@ export async function POST(request: NextRequest) {
       rawTickets = ticketsData.tickets
     }
 
-    // Map Jamaica API fields to our expected format
-    const tickets = rawTickets.map((ticket) => ({
-      id: ticket.ticketNo || ticket.id,
-      ticketNumber: ticket.ticketNo,
-      violation: ticket.offenceDesc || ticket.violation,
-      violationDate: ticket.issueDate || ticket.violationDate,
-      location: ticket.courtLocation || ticket.location || 'N/A',
-      fineAmount: parseFloat(ticket?.fineAmount as unknown as string) || 0,
-      status: ticket.workflowState === 'Paid' ? 'Paid' : 'Outstanding',
-      dueDate: ticket.paymentDueDate || ticket.dueDate,
-      officerName: 'Officer',
-      officerBadge: ticket.offenceCode || 'N/A',
-      offenderName: ticket.offenderFirstName && ticket.offenderLastName
-        ? `${ticket.offenderFirstName} ${ticket.offenderLastName}`
-        : 'N/A',
-      demeritPoints: parseInt(ticket.demeritPoints as unknown as string) || 0,
-      mandatoryCourtApp: (ticket.mandatoryCourtApp === 'true' as unknown as boolean) || ticket.mandatoryCourtApp === true,
-      offenceCode: ticket.offenceCode || 'N/A',
-      paidDate: ticket.workflowState === 'Paid' ? ticket.courtDate : undefined,
-      paymentMethod: ticket.workflowState === 'Paid' ? 'Paid' : undefined,
-    }))
+    // Map external API fields to our TrafficTicket format with explicit type conversion
+    const tickets: TrafficTicket[] = rawTickets.map((externalTicket: ExternalTicket): TrafficTicket => {
+      // Parse fineAmount - handle both string and number types
+      const parseFineAmount = (value: string | number | undefined): number => {
+        if (value === undefined || value === null) return 0
+        if (typeof value === 'number') return value
+        const parsed = parseFloat(value)
+        return isNaN(parsed) ? 0 : parsed
+      }
+
+      // Parse demeritPoints - handle both string and number types
+      const parseDemeritPoints = (value: string | number | undefined): number => {
+        if (value === undefined || value === null) return 0
+        if (typeof value === 'number') return value
+        const parsed = parseInt(value, 10)
+        return isNaN(parsed) ? 0 : parsed
+      }
+
+      // Parse mandatoryCourtApp - handle both string and boolean types
+      const parseMandatoryCourtApp = (value: string | boolean | undefined): boolean => {
+        if (value === undefined || value === null) return false
+        if (typeof value === 'boolean') return value
+        return value === 'true' || value === 'True' || value === '1'
+      }
+
+      return {
+        id: externalTicket.ticketNo || externalTicket.id || '',
+        ticketNumber: externalTicket.ticketNo || '',
+        violation: externalTicket.offenceDesc || externalTicket.violation || '',
+        violationDate: externalTicket.issueDate || externalTicket.violationDate || '',
+        location: externalTicket.courtLocation || externalTicket.location || 'N/A',
+        fineAmount: parseFineAmount(externalTicket.fineAmount),
+        status: externalTicket.workflowState === 'Paid' ? 'Paid' : 'Outstanding',
+        dueDate: externalTicket.paymentDueDate || externalTicket.dueDate || '',
+        officerName: 'Officer',
+        officerBadge: externalTicket.offenceCode || 'N/A',
+        offenderName:
+          externalTicket.offenderFirstName && externalTicket.offenderLastName
+            ? `${externalTicket.offenderFirstName} ${externalTicket.offenderLastName}`
+            : 'N/A',
+        demeritPoints: parseDemeritPoints(externalTicket.demeritPoints),
+        mandatoryCourtApp: parseMandatoryCourtApp(externalTicket.mandatoryCourtApp),
+        offenceCode: externalTicket.offenceCode || 'N/A',
+        paidDate: externalTicket.workflowState === 'Paid' ? externalTicket.courtDate : undefined,
+        paymentMethod: externalTicket.workflowState === 'Paid' ? 'Paid' : undefined,
+      }
+    })
 
     // Calculate statistics
     const outstanding = tickets.filter((t) => t.status === 'Outstanding').length

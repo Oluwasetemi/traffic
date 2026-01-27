@@ -6,6 +6,27 @@ export interface DriverLicenseValidationRequest {
   ipAddress?: string
 }
 
+export interface ExternalTicket {
+  ticketNo?: string
+  id?: string
+  offenceDesc?: string
+  violation?: string
+  issueDate?: string
+  violationDate?: string
+  courtLocation?: string
+  location?: string
+  fineAmount?: string | number
+  workflowState?: string
+  paymentDueDate?: string
+  dueDate?: string
+  offenderFirstName?: string
+  offenderLastName?: string
+  demeritPoints?: string | number
+  mandatoryCourtApp?: string | boolean
+  offenceCode?: string
+  courtDate?: string
+}
+
 export interface TrafficTicket {
   id: string
   ticketNumber: string

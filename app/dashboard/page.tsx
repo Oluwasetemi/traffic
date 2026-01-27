@@ -21,6 +21,7 @@ import { Text } from '../components/text'
 import {
   ExclamationTriangleIcon,
 } from '@heroicons/react/24/outline'
+import { CountUp } from '../components/count-up'
 import type { TicketSearchResponse } from '../types'
 
 export default function DashboardPage() {
@@ -123,7 +124,9 @@ export default function DashboardPage() {
   }
 
   return (
-    <div className="min-h-screen">
+    <div className="relative min-h-screen">
+      {/* Grid Pattern Background */}
+      <div className="absolute inset-0 bg-grid-pattern -z-10" />
       <main className="mx-auto max-w-7xl px-6 py-12 lg:px-8">
         <div className="mb-12">
           <div className="flex items-center gap-3">
@@ -195,7 +198,7 @@ export default function DashboardPage() {
               {data?.totalTickets || 0} total
             </dd>
             <dd className="w-full flex-none text-3xl/10 font-medium tracking-tight text-gray-900 dark:text-white font-mono-custom">
-              {data?.totalTickets || 0}
+              <CountUp end={data?.totalTickets || 0} duration={1.5} />
             </dd>
           </div>
 
@@ -206,7 +209,7 @@ export default function DashboardPage() {
               {data?.outstanding || 0} unpaid
             </dd>
             <dd className="w-full flex-none text-3xl/10 font-medium tracking-tight text-gray-900 dark:text-white font-mono-custom">
-              {data?.outstanding || 0}
+              <CountUp end={data?.outstanding || 0} duration={1.5} />
             </dd>
           </div>
 
@@ -217,7 +220,7 @@ export default function DashboardPage() {
               {((data?.totalTickets || 0) - (data?.outstanding || 0))} settled
             </dd>
             <dd className="w-full flex-none text-3xl/10 font-medium tracking-tight text-gray-900 dark:text-white font-mono-custom">
-              {(data?.totalTickets || 0) - (data?.outstanding || 0)}
+              <CountUp end={(data?.totalTickets || 0) - (data?.outstanding || 0)} duration={1.5} />
             </dd>
           </div>
 
@@ -228,7 +231,12 @@ export default function DashboardPage() {
               {data?.outstanding || 0} tickets
             </dd>
             <dd className="w-full flex-none text-3xl/10 font-medium tracking-tight text-gray-900 dark:text-white font-mono-custom">
-              {formatCurrency(data?.totalOutstanding || 0)}
+              <CountUp
+                end={data?.totalOutstanding || 0}
+                duration={1.5}
+                prefix="JMD $"
+                decimals={2}
+              />
             </dd>
           </div>
 
@@ -245,7 +253,7 @@ export default function DashboardPage() {
                 : 'Safe'}
             </dd>
             <dd className="w-full flex-none text-3xl/10 font-medium tracking-tight text-gray-900 dark:text-white font-mono-custom">
-              {totalDemeritPoints}
+              <CountUp end={totalDemeritPoints} duration={1.5} />
             </dd>
           </div>
         </dl>

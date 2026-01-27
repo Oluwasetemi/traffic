@@ -189,13 +189,13 @@ export function LicenseCapture({
               disabled={isProcessing}
             >
               <option value="tesseract">Tesseract (Fast - Free)</option>
-              <option value="transformers">
+              {/*<option value="transformers">
                 Transformers.js (AI Model - Free)
-              </option>
+              </option>*/}
               <option value="claude">
                 Claude Vision (Best Accuracy - Paid)
               </option>
-              <option value="auto">Auto (Try Best Available)</option>
+              {/*<option value="auto">Auto (Try Best Available)</option>*/}
             </Select>
             <Description>
               {currentEngine === "tesseract" &&

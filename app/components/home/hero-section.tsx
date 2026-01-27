@@ -4,7 +4,20 @@ import { Button } from '../button'
 export function HeroSection() {
   return (
     <div className="relative isolate overflow-hidden">
-      {/* Background gradient */}
+      {/* Enhanced Background with Floating Orbs and Noise */}
+      <div className="absolute inset-0 -z-10">
+        {/* Animated gradient mesh */}
+        <div className="absolute inset-0 bg-gradient-to-br from-[#009B3A]/20 via-[#FFC72C]/10 to-transparent animate-gradient-shift" />
+
+        {/* Floating gradient orbs */}
+        <div className="absolute top-0 right-0 w-[600px] h-[600px] bg-[#FFC72C]/30 rounded-full blur-3xl animate-float-orb" />
+        <div className="absolute bottom-0 left-0 w-[800px] h-[800px] bg-[#009B3A]/20 rounded-full blur-3xl animate-float-orb-delayed" />
+
+        {/* Noise texture overlay */}
+        <div className="absolute inset-0 bg-noise" />
+      </div>
+
+      {/* Top gradient (existing) */}
       <div className="absolute inset-x-0 -top-40 -z-10 transform-gpu overflow-hidden blur-3xl sm:-top-80" aria-hidden="true">
         <div
           className="relative left-[calc(50%-11rem)] aspect-1155/678 w-36.125rem -translate-x-1/2 rotate-30deg bg-gradient-to-tr from-[#009B3A] to-[#FFC72C] opacity-20 dark:opacity-10 sm:left-[calc(50%-30rem)] sm:w-72.1875rem animate-gradient-shift"
@@ -17,17 +30,18 @@ export function HeroSection() {
 
       <div className="mx-auto max-w-7xl px-6 py-24 sm:py-32 lg:px-8 lg:py-40">
         <div className="mx-auto max-w-2xl text-center">
-          <h1 className="text-4xl font-bold tracking-tight text-zinc-950 dark:text-white sm:text-6xl font-display">
+          {/* Kinetic Typography with Staggered Animation */}
+          <h1 className="text-4xl font-bold tracking-tight text-zinc-950 dark:text-white sm:text-6xl font-display animate-slide-up-fade">
             Jamaica{' '}
             <span className="text-gradient">
               Traffic Ticket
             </span>{' '}
             Dashboard
           </h1>
-          <p className="mt-6 text-lg leading-8 text-zinc-600 dark:text-zinc-400">
+          <p className="mt-6 text-lg leading-8 text-zinc-600 dark:text-zinc-400 animate-fade-in-up delay-200">
             Look up and manage traffic tickets in Jamaica. Built with the official Jamaica Traffic Ticket Lookup API for secure and reliable access to your traffic violation records.
           </p>
-          <div className="mt-10 flex items-center justify-center gap-x-6">
+          <div className="mt-10 flex items-center justify-center gap-x-6 animate-fade-in-up delay-400">
             <Button color="blue" href="/lookup" className="hover-lift">
               <MagnifyingGlassIcon data-slot="icon" />
               Start Lookup

@@ -12,7 +12,63 @@ import type { DriverLicenseValidationRequest, TrafficTicket } from '@/app/types'
  */
 export async function POST(request: NextRequest) {
   try {
-    const body: DriverLicenseValidationRequest = await request.json()
+    // Parse and validate request body
+    let body: DriverLicenseValidationRequest
+
+    try {
+      body = await request.json()
+    } catch {
+      return NextResponse.json(
+        { isValid: false, error: 'Invalid JSON in request body' },
+        { status: 400 }
+      )
+    }
+
+    // Validate required fields
+    if (!body.driversLicNo || typeof body.driversLicNo !== 'string') {
+      return NextResponse.json(
+        { isValid: false, error: 'Missing or invalid driversLicNo field' },
+        { status: 400 }
+      )
+    }
+
+    if (!body.controlNo || typeof body.controlNo !== 'string') {
+      return NextResponse.json(
+        { isValid: false, error: 'Missing or invalid controlNo field' },
+        { status: 400 }
+      )
+    }
+
+    if (!body.dateOfBirth || typeof body.dateOfBirth !== 'string') {
+      return NextResponse.json(
+        { isValid: false, error: 'Missing or invalid dateOfBirth field' },
+        { status: 400 }
+      )
+    }
+
+    if (!body.origLicIssueDate || typeof body.origLicIssueDate !== 'string') {
+      return NextResponse.json(
+        { isValid: false, error: 'Missing or invalid origLicIssueDate field' },
+        { status: 400 }
+      )
+    }
+
+    // Validate date fields produce valid timestamps
+    const dateOfBirthTimestamp = new Date(body.dateOfBirth).getTime()
+    if (isNaN(dateOfBirthTimestamp)) {
+      return NextResponse.json(
+        { isValid: false, error: 'Invalid dateOfBirth format (expected YYYY-MM-DD)' },
+        { status: 400 }
+      )
+    }
+
+    const origLicIssueDateTimestamp = new Date(body.origLicIssueDate).getTime()
+    if (isNaN(origLicIssueDateTimestamp)) {
+      return NextResponse.json(
+        { isValid: false, error: 'Invalid origLicIssueDate format (expected YYYY-MM-DD)' },
+        { status: 400 }
+      )
+    }
 
     // Get client IP address
     const forwarded = request.headers.get('x-forwarded-for')
@@ -44,7 +100,27 @@ export async function POST(request: NextRequest) {
       )
     }
 
-    const isValid = await validationResponse.json()
+    // Defensively parse validation response
+    let isValid = false
+    try {
+      const validationData = await validationResponse.json()
+
+      // Handle boolean response
+      if (typeof validationData === 'boolean') {
+        isValid = validationData
+      }
+      // Handle object response with isValid property
+      else if (validationData && typeof validationData === 'object' && 'isValid' in validationData) {
+        isValid = validationData.isValid === true
+      }
+      // Handle any truthy value as valid (fallback)
+      else if (validationData === true) {
+        isValid = true
+      }
+    } catch {
+      // Non-JSON or invalid response - treat as invalid
+      return NextResponse.json({ isValid: false })
+    }
 
     // If license is not valid, return early
     if (!isValid) {
@@ -52,12 +128,7 @@ export async function POST(request: NextRequest) {
     }
 
     // Step 2: License is valid - fetch tickets
-    // Convert dates to Unix timestamps (milliseconds)
-    const dateOfBirthTimestamp = new Date(body.dateOfBirth).getTime()
-    const origLicIssueDateTimestamp = body.origLicIssueDate
-      ? new Date(body.origLicIssueDate).getTime()
-      : dateOfBirthTimestamp
-
+    // Use the already validated timestamps from above
     const queryParams = new URLSearchParams({
       size: '20',
       sort: 'id,desc',
@@ -146,7 +217,8 @@ export async function POST(request: NextRequest) {
       isValid: true,
       tickets: transformedData,
     })
-  } catch (error) {
+  } catch {
+    // Catch any unexpected errors (network failures, etc.)
     return NextResponse.json(
       { isValid: false, error: 'Internal server error' },
       { status: 500 }

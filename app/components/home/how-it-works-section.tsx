@@ -1,17 +1,26 @@
+'use client'
+
 import Image from 'next/image'
 import { ShieldCheckIcon } from '@heroicons/react/24/outline'
+import { useRef } from 'react'
+import { useScrollTrigger } from '../../hooks/useScrollTrigger'
 
 export function HowItWorksSection() {
+  const sectionRef = useRef<HTMLDivElement>(null)
+  const isVisible = useScrollTrigger(sectionRef)
+
   return (
-    <div className="bg-gray-50 py-24 sm:py-32 dark:bg-gray-900">
+    <div className="bg-gray-50 py-24 sm:py-32 dark:bg-gray-900" ref={sectionRef}>
       <div className="mx-auto max-w-2xl px-6 lg:max-w-7xl lg:px-8">
-        <h2 className="text-center text-base/7 font-semibold text-[#009B3A] dark:text-[#00C853]">Simple Process</h2>
-        <p className="mx-auto mt-2 max-w-lg text-center text-4xl font-semibold tracking-tight text-balance text-gray-950 sm:text-5xl dark:text-white font-display">
+        <h2 className={`text-center text-base/7 font-semibold text-[#009B3A] dark:text-[#00C853] transition-all duration-700 ${isVisible ? 'opacity-100 translate-y-0' : 'opacity-0 translate-y-10'}`}>
+          Simple Process
+        </h2>
+        <p className={`mx-auto mt-2 max-w-lg text-center text-4xl font-semibold tracking-tight text-balance text-gray-950 sm:text-5xl dark:text-white font-display transition-all duration-700 delay-100 ${isVisible ? 'opacity-100 translate-y-0' : 'opacity-0 translate-y-10'}`}>
           How to lookup your tickets
         </p>
         <div className="mt-10 grid gap-4 sm:mt-16 lg:grid-cols-3 lg:grid-rows-2">
           {/* Scan License - Left Column */}
-          <div className="relative max-lg:row-start-1 lg:row-span-2">
+          <div className={`relative max-lg:row-start-1 lg:row-span-2 transition-all duration-700 delay-200 ${isVisible ? 'opacity-100 translate-y-0' : 'opacity-0 translate-y-20'}`}>
             <div className="absolute inset-px rounded-lg bg-white lg:rounded-l-4xl dark:bg-gray-800" />
             <div className="relative flex h-full flex-col overflow-hidden rounded-[calc(var(--radius-lg)+1px)] lg:rounded-l-[calc(2rem+1px)]">
               <div className="px-8 pt-8 pb-3 sm:px-10 sm:pt-10 sm:pb-0">
@@ -51,7 +60,7 @@ export function HowItWorksSection() {
           </div>
 
           {/* Auto-Fill Form - Top Right */}
-          <div className="relative max-lg:row-start-2">
+          <div className={`relative max-lg:row-start-2 transition-all duration-700 delay-300 ${isVisible ? 'opacity-100 translate-y-0' : 'opacity-0 translate-y-20'}`}>
             <div className="absolute inset-px rounded-lg bg-white max-lg:rounded-t-4xl dark:bg-gray-800" />
             <div className="relative flex h-full flex-col overflow-hidden rounded-[calc(var(--radius-lg)+1px)] max-lg:rounded-t-[calc(2rem+1px)]">
               <div className="px-8 pt-8 sm:px-10 sm:pt-10">
@@ -95,7 +104,7 @@ export function HowItWorksSection() {
           </div>
 
           {/* Verify & Submit - Middle Right */}
-          <div className="relative max-lg:row-start-3 lg:col-start-2 lg:row-start-2">
+          <div className={`relative max-lg:row-start-3 lg:col-start-2 lg:row-start-2 transition-all duration-700 delay-400 ${isVisible ? 'opacity-100 translate-y-0' : 'opacity-0 translate-y-20'}`}>
             <div className="absolute inset-px rounded-lg bg-white dark:bg-gray-800" />
             <div className="relative flex h-full flex-col overflow-hidden rounded-[calc(var(--radius-lg)+1px)]">
               <div className="px-8 pt-8 sm:px-10 sm:pt-10">
@@ -122,7 +131,7 @@ export function HowItWorksSection() {
           </div>
 
           {/* View Dashboard - Right Column */}
-          <div className="relative max-lg:row-start-4 lg:row-span-2">
+          <div className={`relative max-lg:row-start-4 lg:row-span-2 transition-all duration-700 delay-500 ${isVisible ? 'opacity-100 translate-y-0' : 'opacity-0 translate-y-20'}`}>
             <div className="absolute inset-px rounded-lg bg-white max-lg:rounded-b-4xl lg:rounded-r-4xl dark:bg-gray-800" />
             <div className="relative flex h-full flex-col overflow-hidden rounded-[calc(var(--radius-lg)+1px)] max-lg:rounded-b-[calc(2rem+1px)] lg:rounded-r-[calc(2rem+1px)]">
               <div className="px-8 pt-8 pb-3 sm:px-10 sm:pt-10 sm:pb-0">

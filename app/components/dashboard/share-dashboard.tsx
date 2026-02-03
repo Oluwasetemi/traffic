@@ -170,6 +170,10 @@ export function ShareDashboard({ isOpen, onClose, dashboardRef, data }: ShareDas
         handleSocialShare('twitter')
       }
     } catch (err) {
+      if (err instanceof Error && err.name === 'AbortError') {
+        // User cancelled - not an error
+        return
+      }
       console.error('Share error:', err)
       setError('Failed to share')
     } finally {
@@ -186,7 +190,7 @@ export function ShareDashboard({ isOpen, onClose, dashboardRef, data }: ShareDas
 
     const shareUrls = {
       twitter: `https://x.com/intent/tweet?text=${encodeURIComponent(cardText)}`,
-      facebook: `https://www.facebook.com/sharer/sharer.php?&quote=${encodeURIComponent(cardText)}`,
+      facebook: `https://www.facebook.com/sharer/sharer.php?u=${encodeURIComponent(url)}`,
       linkedin: `https://www.linkedin.com/sharing/share-offsite/?url=${encodeURIComponent(url)}`,
       whatsapp: `https://wa.me/?text=${encodeURIComponent(cardText + '\n\n' + url)}`,
     }

@@ -115,8 +115,10 @@ export async function sendNotification(message: string, targetUserId?: string) {
       promises.push(
         webpush.sendNotification(webPushSubscription, payload).catch(async (error) => {
           console.error('Error sending notification:', error)
-          // Remove failed subscription from database
-          await db.delete(pushSubscription).where(eq(pushSubscription.id, sub.id))
+          // Only remove subscription if it's permanently gone (410)
+          if (error?.statusCode === 410) {
+            await db.delete(pushSubscription).where(eq(pushSubscription.id, sub.id))
+          }
         })
       )
     }

@@ -18,7 +18,6 @@ export function InstallPrompt() {
   useEffect(() => {
     // Check if already installed
     if (window.matchMedia('(display-mode: standalone)').matches) {
-      // eslint-disable-next-line
       setIsInstalled(true)
       return
     }
@@ -26,8 +25,10 @@ export function InstallPrompt() {
     // Check if iOS
     const userAgent = window.navigator.userAgent.toLowerCase()
     const isIOSDevice = /iphone|ipad|ipod/.test(userAgent)
-    // eslint-disable-next-line
     setIsIOS(isIOSDevice)
+    if (isIOSDevice) {
+      setShowPrompt(true)
+    }
 
     // Listen for beforeinstallprompt event (Chrome, Edge, Samsung Internet)
     const handleBeforeInstallPrompt = (e: Event) => {

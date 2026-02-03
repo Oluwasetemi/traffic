@@ -1,5 +1,6 @@
 'use client'
 
+import Link from 'next/link'
 import {
   MagnifyingGlassIcon,
   ChartBarIcon,
@@ -185,10 +186,13 @@ export function FeaturesSection() {
             <p className="text-sm text-zinc-600 dark:text-zinc-400 mb-4">
               All features work seamlessly across desktop and mobile
             </p>
-            <div className="inline-flex items-center gap-2 px-6 py-3 rounded-full bg-gradient-to-r from-[#009B3A] to-[#FFC72C] text-white font-semibold shadow-lg hover:shadow-xl hover:scale-105 transition-all duration-300 cursor-pointer">
-              <DevicePhoneMobileIcon className="size-5" />
+            <Link
+              href="/lookup"
+              className="inline-flex items-center gap-2 px-6 py-3 rounded-full bg-gradient-to-r from-[#009B3A] to-[#FFC72C] text-white font-semibold shadow-lg hover:shadow-xl hover:scale-105 transition-all duration-300"
+            >
+              <DevicePhoneMobileIcon className="size-5" aria-hidden="true" />
               <span>Try it now</span>
-            </div>
+            </Link>
           </div>
         </div>
       </div>

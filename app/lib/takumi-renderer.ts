@@ -3,6 +3,8 @@
  * Generates beautiful shareable images from card data
  */
 
+const baseURL = process.env.NEXT_PUBLIC_BASE_URL || 'http://localhost:3000'
+
 interface CardData {
   totalTickets: number
   outstanding: number
@@ -27,7 +29,10 @@ export async function renderComponentToImage(
     const data = (_component.props as { data: CardData }).data
     const isMobile = _options?.mobile || false
 
-    const url = isMobile ? '/api/generate-report-card?mobile=true' : '/api/generate-report-card'
+    const url = new URL(
+      isMobile ? '/api/generate-report-card?mobile=true' : '/api/generate-report-card',
+      baseURL
+    ).toString()
 
     const response = await fetch(url, {
       method: 'POST',
@@ -41,14 +46,10 @@ export async function renderComponentToImage(
       throw new Error('Failed to generate image')
     }
 
-    // Convert response to blob then to data URL
-    const blob = await response.blob()
-    return new Promise((resolve, reject) => {
-      const reader = new FileReader()
-      reader.onloadend = () => resolve(reader.result as string)
-      reader.onerror = reject
-      reader.readAsDataURL(blob)
-    })
+    const contentType = response.headers.get('content-type') ?? 'image/png'
+    const arrayBuffer = await response.arrayBuffer()
+    const base64 = Buffer.from(arrayBuffer).toString('base64')
+    return `data:${contentType};base64,${base64}`
   } catch (error) {
     console.error('Report card generation error:', error)
     throw new Error('Failed to generate share image')
@@ -70,7 +71,10 @@ export async function renderComponentToBlob(
     const data = (_component.props as { data: CardData }).data
     const isMobile = _options?.mobile || false
 
-    const url = isMobile ? '/api/generate-report-card?mobile=true' : '/api/generate-report-card'
+    const url = new URL(
+      isMobile ? '/api/generate-report-card?mobile=true' : '/api/generate-report-card',
+      baseURL
+    ).toString()
 
     const response = await fetch(url, {
       method: 'POST',

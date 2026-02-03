@@ -155,10 +155,12 @@ export function ShareDashboard({ isOpen, onClose, dashboardRef, data }: ShareDas
         throw new Error('Nothing to share')
       }
 
-      const shared = await shareImage(blob, 'Jamaica Traffic Ticket Report Card')
-
-      if (!shared) {
-        // Fallback to social media links if native share failed
+      const canNativeShare = navigator.share && navigator.canShare
+      if (canNativeShare) {
+        await shareImage(blob, 'Jamaica Traffic Ticket Report Card')
+        // Don't fallback on cancel - user made a choice
+      } else {
+        // Native share not available, offer social options
         handleSocialShare('twitter')
       }
     } catch (err) {
@@ -200,8 +202,12 @@ export function ShareDashboard({ isOpen, onClose, dashboardRef, data }: ShareDas
     if (isOpen && !previewUrl && data) {
       handleGenerateReportCard()
     }
-    // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [isOpen, previewUrl])
+  }, [isOpen, previewUrl, data])
+
+  // Clear preview when data changes to force regeneration
+  useEffect(() => {
+    setPreviewUrl(null)
+  }, [data])
 
   return (
     <Dialog open={isOpen} onClose={onClose} size="3xl">

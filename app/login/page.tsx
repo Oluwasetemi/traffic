@@ -46,11 +46,12 @@ export default function LoginPage() {
         callbackURL: '/lookup',
       })
 
-      if (result.error) {
-        setError(result.error.message || 'Failed to sign in with Google. Please try again.')
+      // If redirect is false, the flow failed and no redirect will occur
+      if (!result.redirect) {
+        setError('Failed to sign in with Google. Please try again.')
         setIsLoading(false)
       }
-      // If successful, Better Auth will redirect to the callback URL
+      // If redirect is true, Better Auth will navigate to the provider's auth URL
     } catch {
       setError('Failed to sign in with Google. Please try again.')
       setIsLoading(false)

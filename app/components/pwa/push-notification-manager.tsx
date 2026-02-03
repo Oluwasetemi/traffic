@@ -59,12 +59,17 @@ export function PushNotificationManager() {
       const registration = await registerServiceWorker()
       await navigator.serviceWorker.ready
 
+      const vapidKey = process.env.NEXT_PUBLIC_VAPID_PUBLIC_KEY
+      if (!vapidKey) {
+        setMessage('Push notifications are not configured')
+        setIsLoading(false)
+        return
+      }
+
       // Subscribe to push notifications
       const sub = await registration.pushManager.subscribe({
         userVisibleOnly: true,
-        applicationServerKey: urlBase64ToUint8Array(
-          process.env.NEXT_PUBLIC_VAPID_PUBLIC_KEY!
-        ),
+        applicationServerKey: urlBase64ToUint8Array(vapidKey),
       })
 
       // Send subscription to server

@@ -5,7 +5,7 @@ import { db } from './db'
 import * as schema from './db/schema'
 
 export const auth = betterAuth({
-  baseURL: process.env.BETTER_AUTH_URL || process.env.NEXT_PUBLIC_BASE_URL || 'http://localhost:3000',
+  baseURL: process.env.BETTER_AUTH_URL,
   database: drizzleAdapter(db, {
     provider: 'pg',
     schema,
@@ -14,10 +14,14 @@ export const auth = betterAuth({
     enabled: true,
   },
   socialProviders: {
-    google: {
-      clientId: process.env.GOOGLE_CLIENT_ID!,
-      clientSecret: process.env.GOOGLE_CLIENT_SECRET!,
-    },
+    ...(process.env.GOOGLE_CLIENT_ID && process.env.GOOGLE_CLIENT_SECRET
+      ? {
+          google: {
+            clientId: process.env.GOOGLE_CLIENT_ID,
+            clientSecret: process.env.GOOGLE_CLIENT_SECRET,
+          },
+        }
+      : {}),
   },
   rateLimit: {
     enabled: true,
@@ -26,7 +30,11 @@ export const auth = betterAuth({
     storage: 'database', // Store rate limit data in database
   },
   plugins: [nextCookies()],
-  trustedOrigins: [process.env.NEXT_PUBLIC_BASE_URL || 'http://localhost:3000'],
+  trustedOrigins: [
+    process.env.BETTER_AUTH_URL,
+    process.env.NEXT_PUBLIC_BASE_URL,
+    'http://localhost:3000',
+  ].filter(Boolean) as string[],
 })
 
 export type Session = typeof auth.$Infer.Session

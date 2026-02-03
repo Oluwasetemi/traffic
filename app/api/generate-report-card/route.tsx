@@ -299,10 +299,23 @@ function formatCurrency(amount: number) {
 export async function POST(request: NextRequest) {
   try {
     const body = await request.text()
-    console.log('Received request body:', body)
+    console.log('Received report card generation request')
 
     const data: CardData = JSON.parse(body)
-    console.log('Parsed data:', data)
+
+    // Validate required fields
+    if (typeof data.totalTickets !== 'number' ||
+        typeof data.outstanding !== 'number' ||
+        typeof data.paid !== 'number' ||
+        typeof data.totalOutstanding !== 'number' ||
+        typeof data.demeritPoints !== 'number') {
+      return new Response(JSON.stringify({ error: 'Invalid card data' }), {
+        status: 400,
+        headers: { 'Content-Type': 'application/json' }
+      })
+    }
+
+    console.log('Generating card for tickets:', data.totalTickets)
 
     // Check if mobile version is requested
     const url = new URL(request.url)

@@ -2,10 +2,17 @@
 
 import webpush, { PushSubscription as WebPushSubscription } from 'web-push'
 
+const publicKey = process.env.NEXT_PUBLIC_VAPID_PUBLIC_KEY
+const privateKey = process.env.VAPID_PRIVATE_KEY
+
+if (!publicKey || !privateKey) {
+  console.error('VAPID keys not configured. Push notifications will not work.')
+}
+
 // Configure web-push with VAPID details
 const vapidKeys = {
-  publicKey: process.env.NEXT_PUBLIC_VAPID_PUBLIC_KEY!,
-  privateKey: process.env.VAPID_PRIVATE_KEY!,
+  publicKey: publicKey || '',
+  privateKey: privateKey || '',
 }
 
 webpush.setVapidDetails(
@@ -23,7 +30,7 @@ export async function subscribeUser(subscription: WebPushSubscription) {
     const endpoint = subscription.endpoint
     subscriptions.set(endpoint, subscription)
 
-    console.log('User subscribed:', endpoint)
+    console.log('User subscribed:', endpoint.slice(-20))
 
     return { success: true, message: 'Subscribed successfully' }
   } catch (error) {
@@ -55,6 +62,7 @@ export async function sendNotification(message: string) {
 
     // Send to all subscribed users
     const promises: Promise<unknown>[] = []
+    const initialCount = subscriptions.size
 
     subscriptions.forEach((subscription) => {
       promises.push(
@@ -70,7 +78,7 @@ export async function sendNotification(message: string) {
 
     return {
       success: true,
-      message: `Notification sent to ${subscriptions.size} subscribers`,
+      message: `Notification sent to ${initialCount} subscribers`,
     }
   } catch (error) {
     console.error('Send notification error:', error)

@@ -33,6 +33,9 @@ export const auth = betterAuth({
   trustedOrigins: [
     process.env.BETTER_AUTH_URL,
     process.env.NEXT_PUBLIC_BASE_URL,
+    process.env.URL, // Netlify main site URL
+    process.env.DEPLOY_URL, // Netlify deploy-specific URL
+    process.env.DEPLOY_PRIME_URL, // Netlify primary URL for deploy context
     'http://localhost:3000',
   ].filter(Boolean) as string[],
 })

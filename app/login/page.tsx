@@ -1,15 +1,12 @@
 'use client'
 
 import { useState } from 'react'
-import { useTransitionRouter } from 'next-view-transitions'
 import { Link } from '../components/link'
 import { Button } from '../components/button'
-import { Input } from '../components/input'
-import { Field, Label, ErrorMessage, Description } from '../components/fieldset'
-import { Checkbox, CheckboxField } from '../components/checkbox'
 import { AuthLayout } from '../components/auth-layout'
 import { Heading } from '../components/heading'
 import { Text } from '../components/text'
+import { signIn } from '../lib/auth-client'
 
 export function GoogleIcon() {
   return (
@@ -34,84 +31,29 @@ export function GoogleIcon() {
   )
 }
 
-export function GitHubIcon() {
-  return (
-    <svg className="size-5" fill="currentColor" viewBox="0 0 20 20" aria-hidden="true">
-      <path
-        fillRule="evenodd"
-        d="M10 0C4.477 0 0 4.484 0 10.017c0 4.425 2.865 8.18 6.839 9.504.5.092.682-.217.682-.483 0-.237-.008-.868-.013-1.703-2.782.605-3.369-1.343-3.369-1.343-.454-1.158-1.11-1.466-1.11-1.466-.908-.62.069-.608.069-.608 1.003.07 1.531 1.032 1.531 1.032.892 1.53 2.341 1.088 2.91.832.092-.647.35-1.088.636-1.338-2.22-.253-4.555-1.113-4.555-4.951 0-1.093.39-1.988 1.029-2.688-.103-.253-.446-1.272.098-2.65 0 0 .84-.27 2.75 1.026A9.564 9.564 0 0110 4.844c.85.004 1.705.115 2.504.337 1.909-1.296 2.747-1.027 2.747-1.027.546 1.379.203 2.398.1 2.651.64.7 1.028 1.595 1.028 2.688 0 3.848-2.339 4.695-4.566 4.942.359.31.678.921.678 1.856 0 1.338-.012 2.419-.012 2.747 0 .268.18.58.688.482A10.019 10.019 0 0020 10.017C20 4.484 15.522 0 10 0z"
-        clipRule="evenodd"
-      />
-    </svg>
-  )
-}
 
 export default function LoginPage() {
-  const router = useTransitionRouter()
   const [isLoading, setIsLoading] = useState(false)
   const [error, setError] = useState<string | null>(null)
-  const [fieldErrors, setFieldErrors] = useState<Map<string, string>>(new Map())
-  const [formData, setFormData] = useState({
-    email: '',
-    password: '',
-  })
 
-  const validateField = (name: string, value: string): string | null => {
-    switch (name) {
-      case 'email':
-        if (!value) return 'Email is required'
-        if (!/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(value)) return 'Invalid email address'
-        return null
-      case 'password':
-        if (!value) return 'Password is required'
-        if (value.length < 8) return 'Password must be at least 8 characters'
-        return null
-      default:
-        return null
-    }
-  }
-
-  const handleInputChange = (e: React.ChangeEvent<HTMLInputElement>) => {
-    const { name, value } = e.target
-    setFormData((prev) => ({ ...prev, [name]: value }))
-
-    // Clear error when user starts typing
-    if (fieldErrors.has(name)) {
-      const newErrors = new Map(fieldErrors)
-      newErrors.delete(name)
-      setFieldErrors(newErrors)
-    }
-    if (error) setError(null)
-  }
-
-  const handleSubmit = async (e: React.FormEvent) => {
-    e.preventDefault()
+  const handleGoogleLogin = async () => {
     setIsLoading(true)
     setError(null)
 
-    // Validate all fields
-    const newErrors = new Map<string, string>()
-    Object.entries(formData).forEach(([name, value]) => {
-      const error = validateField(name, value)
-      if (error) newErrors.set(name, error)
-    })
-
-    if (newErrors.size > 0) {
-      setFieldErrors(newErrors)
-      setIsLoading(false)
-      return
-    }
-
     try {
-      // TODO: Implement actual authentication
-      // For now, simulate API call
-      await new Promise((resolve) => setTimeout(resolve, 1000))
+      const result = await signIn.social({
+        provider: 'google',
+        callbackURL: '/lookup',
+      })
 
-      // Redirect to dashboard on success
-      router.push('/dashboard')
-    } catch (err) {
-      setError('Invalid email or password. Please try again.')
-    } finally {
+      // If redirect is false, the flow failed and no redirect will occur
+      if (!result.redirect) {
+        setError('Failed to sign in with Google. Please try again.')
+        setIsLoading(false)
+      }
+      // If redirect is true, Better Auth will navigate to the provider's auth URL
+    } catch {
+      setError('Failed to sign in with Google. Please try again.')
       setIsLoading(false)
     }
   }
@@ -122,10 +64,7 @@ export default function LoginPage() {
         <div className="text-center">
           <Heading level={1}>Sign in to your account</Heading>
           <Text className="mt-2">
-            Or{' '}
-            <Link href="/register" className="font-medium text-blue-600 hover:text-blue-500 dark:text-blue-400">
-              create a new account
-            </Link>
+            Use your Google account to access the Jamaica Traffic Ticket Dashboard
           </Text>
         </div>
 
@@ -135,81 +74,25 @@ export default function LoginPage() {
           </div>
         )}
 
-        <form onSubmit={handleSubmit} className="mt-8 space-y-6">
-          <Field>
-            <Label>Email address</Label>
-            <Input
-              type="email"
-              name="email"
-              value={formData.email}
-              onChange={handleInputChange}
-              autoComplete="email"
-              required
-              invalid={fieldErrors.has('email')}
-            />
-            {fieldErrors.has('email') && (
-              <ErrorMessage>{fieldErrors.get('email')}</ErrorMessage>
-            )}
-          </Field>
+        <div className="mt-10">
+          <Button
+            onClick={handleGoogleLogin}
+            outline
+            className="w-full items-center! justify-center gap-3 py-3"
+            disabled={isLoading}
+          >
+            <GoogleIcon />
+            <span>{isLoading ? 'Signing in...' : 'Continue with Google'}</span>
+          </Button>
+        </div>
 
-          <Field>
-            <Label>Password</Label>
-            <Input
-              type="password"
-              name="password"
-              value={formData.password}
-              onChange={handleInputChange}
-              autoComplete="current-password"
-              required
-              invalid={fieldErrors.has('password')}
-            />
-            {fieldErrors.has('password') && (
-              <ErrorMessage>{fieldErrors.get('password')}</ErrorMessage>
-            )}
-          </Field>
-
-          <div className="flex items-center justify-between">
-            <CheckboxField>
-              <Checkbox name="remember-me" />
-              <Label>Remember me</Label>
-            </CheckboxField>
-
-            <div className="text-sm">
-              <Link href="/forgot-password">
-                Forgot your password?
-              </Link>
-            </div>
-          </div>
-
-          <div>
-            <Button type="submit" color="blue" className="w-full" disabled={isLoading}>
-              {isLoading ? 'Signing in...' : 'Sign in'}
-            </Button>
-          </div>
-        </form>
-
-        <div className="mt-6">
-          <div className="relative">
-            <div className="absolute inset-0 flex items-center">
-              <div className="w-full border-t border-zinc-200 dark:border-zinc-700" />
-            </div>
-            <div className="relative flex justify-center text-sm">
-              <span className="bg-white px-2 text-zinc-500 dark:bg-zinc-900 dark:text-zinc-400">
-                Or continue with
-              </span>
-            </div>
-          </div>
-
-          <div className="mt-6 grid grid-cols-2 gap-3">
-            <Button outline className="w-full">
-              <GoogleIcon />
-              Google
-            </Button>
-            <Button outline className="w-full">
-              <GitHubIcon />
-              GitHub
-            </Button>
-          </div>
+        <div className="mt-8 text-center">
+          <Text className="text-sm text-zinc-600 dark:text-zinc-400">
+            Don&apos;t have an account?{' '}
+            <Link href="/register" className="font-medium text-blue-600 hover:text-blue-500 dark:text-blue-400">
+              Sign up
+            </Link>
+          </Text>
         </div>
       </div>
     </AuthLayout>

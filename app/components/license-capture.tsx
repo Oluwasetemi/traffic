@@ -141,7 +141,7 @@ export function LicenseCapture({
         {/* Info banner showing what to look for */}
         <div className="mb-4 rounded-lg bg-blue-50 p-4 dark:bg-blue-950/20">
           <div className="flex gap-2">
-            <InformationCircleIcon className="h-5 w-5 flex-shrink-0 text-blue-600 dark:text-blue-400" />
+            <InformationCircleIcon className="h-5 w-5 shrink-0 text-blue-600 dark:text-blue-400" />
             <div className="text-sm text-blue-900 dark:text-blue-100">
               <p className="font-semibold mb-2">
                 {currentSide === "front"
@@ -188,13 +188,13 @@ export function LicenseCapture({
               }
               disabled={isProcessing}
             >
+              <option value="claude">
+                Claude Vision (Best Accuracy - Recommended)
+              </option>
               <option value="tesseract">Tesseract (Fast - Free)</option>
               {/*<option value="transformers">
                 Transformers.js (AI Model - Free)
               </option>*/}
-              <option value="claude">
-                Claude Vision (Best Accuracy - Paid)
-              </option>
               {/*<option value="auto">Auto (Try Best Available)</option>*/}
             </Select>
             <Description>

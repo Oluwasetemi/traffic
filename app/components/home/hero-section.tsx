@@ -43,7 +43,7 @@ export function HeroSection() {
           </p>
           <div className="mt-10 flex items-center justify-center gap-x-6 animate-fade-in-up delay-400">
             <Button color="blue" href="/lookup" className="hover-lift">
-              <MagnifyingGlassIcon data-slot="icon" />
+              <MagnifyingGlassIcon data-slot="icon" aria-hidden="true" />
               Start Lookup
             </Button>
             <Button outline href="/dashboard" className="hover-lift">

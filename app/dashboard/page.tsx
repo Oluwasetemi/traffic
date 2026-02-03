@@ -1,6 +1,7 @@
 'use client'
 
-import { useEffect, useState, useMemo, useCallback } from 'react'
+import { useEffect, useState, useMemo, useCallback, useRef } from 'react'
+import { ProtectedRoute } from '../components/protected-route'
 import { Badge } from '../components/badge'
 import {
   Table,
@@ -23,12 +24,16 @@ import {
 } from '@heroicons/react/24/outline'
 import { CountUp } from '../components/count-up'
 import type { TicketSearchResponse } from '../types'
+import { PushNotificationManager } from '../components/pwa/push-notification-manager'
+import { InstallPrompt } from '../components/pwa/install-prompt'
+import { ShareButton } from '../components/dashboard/share-dashboard'
 
 export default function DashboardPage() {
   const [data, setData] = useState<TicketSearchResponse | null>(null)
   const [isLoading, setIsLoading] = useState(true)
   const [filter, setFilter] = useState<'all' | 'outstanding' | 'paid'>('all')
   const [isRealData, setIsRealData] = useState(false)
+  const dashboardRef = useRef<HTMLDivElement>(null)
 
   useEffect(() => {
     fetchTickets()
@@ -124,10 +129,11 @@ export default function DashboardPage() {
   }
 
   return (
-    <div className="relative min-h-screen">
-      {/* Grid Pattern Background */}
-      <div className="absolute inset-0 bg-grid-pattern -z-10" />
-      <main className="mx-auto max-w-7xl px-6 py-12 lg:px-8">
+    <ProtectedRoute>
+      <div className="relative min-h-screen">
+        {/* Grid Pattern Background */}
+        <div className="absolute inset-0 bg-grid-pattern -z-10" />
+        <main ref={dashboardRef} className="mx-auto max-w-7xl px-6 py-12 lg:px-8">
         <div className="mb-12">
           <div className="flex items-center gap-3">
             <Heading className="font-display">Traffic Ticket Dashboard</Heading>
@@ -413,7 +419,17 @@ export default function DashboardPage() {
             </div>
           </div>
         )}
+
+        {/* PWA Components */}
+        <div className="mt-12">
+          <PushNotificationManager />
+        </div>
       </main>
-    </div>
+
+      {/* Install Prompt & Share Button */}
+      <InstallPrompt />
+      <ShareButton dashboardRef={dashboardRef} data={data} />
+      </div>
+    </ProtectedRoute>
   )
 }

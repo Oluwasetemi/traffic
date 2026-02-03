@@ -13,7 +13,7 @@ import {
 import { extractText, extractLicenseData, type OCREngine } from '../lib/ocr-unified'
 import { initializeTransformersOCR } from '../lib/ocr-transformers'
 
-export function useOCR(initialEngine: OCREngine = 'tesseract') {
+export function useOCR(initialEngine: OCREngine = 'claude') {
   const [currentEngine, setCurrentEngine] = useState<OCREngine>(initialEngine)
   const [processingState, setProcessingState] = useState<OCRProcessingState>({
     isProcessing: false,

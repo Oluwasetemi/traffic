@@ -75,22 +75,42 @@ export async function POST(request: NextRequest) {
     const ip = forwarded ? forwarded.split(',')[0] : request.headers.get('x-real-ip') || '127.0.0.1'
 
     // Step 1: Validate the license
-    const validationResponse = await fetch(
-      'https://trafficticketlookup.gov.jm/api/driver-licences/is-valid',
-      {
-        method: 'POST',
-        headers: {
-          'Content-Type': 'application/json',
-          'Accept': 'application/json',
-          'Origin': 'https://trafficticketlookup.gov.jm',
-          'Referer': 'https://trafficticketlookup.gov.jm/',
-        },
-        body: JSON.stringify({
-          ...body,
-          ipAddress: ip,
-        }),
+    const validationController = new AbortController()
+    const validationTimeout = setTimeout(() => validationController.abort(), 10000)
+
+    let validationResponse
+    try {
+      validationResponse = await fetch(
+        'https://trafficticketlookup.gov.jm/api/driver-licences/is-valid',
+        {
+          method: 'POST',
+          headers: {
+            'Content-Type': 'application/json',
+            'Accept': 'application/json',
+            'Origin': 'https://trafficticketlookup.gov.jm',
+            'Referer': 'https://trafficticketlookup.gov.jm/',
+          },
+          body: JSON.stringify({
+            ...body,
+            ipAddress: ip,
+          }),
+          signal: validationController.signal,
+        }
+      )
+      clearTimeout(validationTimeout)
+    } catch (error) {
+      clearTimeout(validationTimeout)
+      if (error instanceof Error && error.name === 'AbortError') {
+        return NextResponse.json(
+          { isValid: false, error: 'License validation request timeout' },
+          { status: 504 }
+        )
       }
-    )
+      return NextResponse.json(
+        { isValid: false, error: 'Failed to connect to validation service' },
+        { status: 503 }
+      )
+    }
 
     if (!validationResponse.ok) {
       const error = await validationResponse.json().catch(() => ({}))
@@ -142,19 +162,37 @@ export async function POST(request: NextRequest) {
       ipAddress: ip,
     }
 
-    const ticketsResponse = await fetch(
-      `https://trafficticketlookup.gov.jm/api/traffic-tickets?${queryParams.toString()}`,
-      {
-        method: 'POST',
-        headers: {
-          'Content-Type': 'application/json',
-          'Accept': 'application/json',
-          'Origin': 'https://trafficticketlookup.gov.jm',
-          'Referer': 'https://trafficticketlookup.gov.jm/',
-        },
-        body: JSON.stringify(requestBody),
-      }
-    )
+    const ticketsController = new AbortController()
+    const ticketsTimeout = setTimeout(() => ticketsController.abort(), 10000)
+
+    let ticketsResponse
+    try {
+      ticketsResponse = await fetch(
+        `https://trafficticketlookup.gov.jm/api/traffic-tickets?${queryParams.toString()}`,
+        {
+          method: 'POST',
+          headers: {
+            'Content-Type': 'application/json',
+            'Accept': 'application/json',
+            'Origin': 'https://trafficticketlookup.gov.jm',
+            'Referer': 'https://trafficticketlookup.gov.jm/',
+          },
+          body: JSON.stringify(requestBody),
+          signal: ticketsController.signal,
+        }
+      )
+      clearTimeout(ticketsTimeout)
+    } catch (error) {
+      clearTimeout(ticketsTimeout)
+      // Even if tickets fetch times out or fails, we still return that the license is valid
+      return NextResponse.json({
+        isValid: true,
+        tickets: null,
+        error: error instanceof Error && error.name === 'AbortError'
+          ? 'Tickets request timeout'
+          : 'Failed to connect to tickets service',
+      })
+    }
 
     // Even if tickets fetch fails, we still return that the license is valid
     if (!ticketsResponse.ok) {

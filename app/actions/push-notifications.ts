@@ -9,17 +9,13 @@ if (!publicKey || !privateKey) {
   console.error('VAPID keys not configured. Push notifications will not work.')
 }
 
-// Configure web-push with VAPID details
-const vapidKeys = {
-  publicKey: publicKey || '',
-  privateKey: privateKey || '',
+if (publicKey && privateKey) {
+  webpush.setVapidDetails(
+    'mailto:traffic@jamaica.gov.jm',
+    publicKey,
+    privateKey
+  )
 }
-
-webpush.setVapidDetails(
-  'mailto:traffic@jamaica.gov.jm',
-  vapidKeys.publicKey,
-  vapidKeys.privateKey
-)
 
 // In-memory storage for subscriptions (use database in production)
 const subscriptions = new Map<string, WebPushSubscription>()
@@ -30,7 +26,7 @@ export async function subscribeUser(subscription: WebPushSubscription) {
     const endpoint = subscription.endpoint
     subscriptions.set(endpoint, subscription)
 
-    console.log('User subscribed:', endpoint.slice(-20))
+    console.log('User subscribed')
 
     return { success: true, message: 'Subscribed successfully' }
   } catch (error) {

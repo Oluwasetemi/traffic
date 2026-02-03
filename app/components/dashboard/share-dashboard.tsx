@@ -155,7 +155,13 @@ export function ShareDashboard({ isOpen, onClose, dashboardRef, data }: ShareDas
         throw new Error('Nothing to share')
       }
 
-      const canNativeShare = navigator.share && navigator.canShare
+      const canNativeShare =
+        typeof navigator !== 'undefined' &&
+        navigator.share &&
+        navigator.canShare &&
+        navigator.canShare({
+          files: [new File([blob], 'report.png', { type: blob.type || 'image/png' })],
+        })
       if (canNativeShare) {
         await shareImage(blob, 'Jamaica Traffic Ticket Report Card')
         // Don't fallback on cancel - user made a choice

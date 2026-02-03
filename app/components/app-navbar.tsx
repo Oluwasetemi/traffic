@@ -8,9 +8,18 @@ import {
   NavbarItem
 } from './navbar'
 import { ThemeToggle } from './theme-toggle'
+import { useSession, signOut } from '../lib/auth-client'
+import { useTransitionRouter } from 'next-view-transitions'
 
 export function AppNavbar() {
   const pathname = usePathname()
+  const { data: session } = useSession()
+  const router = useTransitionRouter()
+
+  const handleSignOut = async () => {
+    await signOut()
+    router.push('/')
+  }
 
   return (
     <Navbar>
@@ -39,6 +48,11 @@ export function AppNavbar() {
       </NavbarSection>
       <NavbarSection>
         <ThemeToggle />
+        {session && (
+          <NavbarItem onClick={handleSignOut}>
+            Sign Out
+          </NavbarItem>
+        )}
       </NavbarSection>
     </Navbar>
   )

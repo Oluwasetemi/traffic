@@ -19,7 +19,7 @@ export async function GET(request: Request) {
             flexDirection: 'column',
             alignItems: 'center',
             justifyContent: 'center',
-            background: 'linear-gradient(135deg, #1e40af 0%, #3b82f6 100%)',
+            background: 'linear-gradient(135deg, #000000 0%, #009B3A 50%, #FFC72C 100%)',
           }}
         >
           <div
@@ -46,13 +46,13 @@ export async function GET(request: Request) {
                   width: '80px',
                   height: '80px',
                   borderRadius: '16px',
-                  background: 'white',
                   display: 'flex',
                   alignItems: 'center',
                   justifyContent: 'center',
                   fontSize: '48px',
                   fontWeight: 'bold',
-                  color: '#1e40af',
+                  background: 'linear-gradient(135deg, #009B3A 0%, #FFC72C 100%)',
+                  color: '#000000',
                 }}
               >
                 JM

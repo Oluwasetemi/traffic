@@ -1,6 +1,10 @@
 'use server'
 
 import webpush, { PushSubscription as WebPushSubscription } from 'web-push'
+import { db } from '../lib/db'
+import { pushSubscription } from '../lib/db/schema'
+import { eq } from 'drizzle-orm'
+import { nanoid } from 'nanoid'
 
 const publicKey = process.env.NEXT_PUBLIC_VAPID_PUBLIC_KEY
 const privateKey = process.env.VAPID_PRIVATE_KEY
@@ -17,14 +21,45 @@ if (publicKey && privateKey) {
   )
 }
 
-// In-memory storage for subscriptions (use database in production)
-const subscriptions = new Map<string, WebPushSubscription>()
+// Database-backed subscription storage
 
-export async function subscribeUser(subscription: WebPushSubscription) {
+export async function subscribeUser(subscription: WebPushSubscription, userId: string) {
   try {
-    // Store subscription (in production, save to database)
+    // Store subscription in database
     const endpoint = subscription.endpoint
-    subscriptions.set(endpoint, subscription)
+    const keys = subscription.keys
+
+    // Check if subscription already exists
+    const existing = await db
+      .select()
+      .from(pushSubscription)
+      .where(eq(pushSubscription.endpoint, endpoint))
+      .limit(1)
+
+    if (existing.length > 0) {
+      // Update existing subscription
+      await db
+        .update(pushSubscription)
+        .set({
+          p256dh: keys.p256dh,
+          auth: keys.auth,
+          expirationTime: subscription.expirationTime ? new Date(subscription.expirationTime) : null,
+          updatedAt: new Date(),
+        })
+        .where(eq(pushSubscription.endpoint, endpoint))
+    } else {
+      // Insert new subscription
+      await db.insert(pushSubscription).values({
+        id: nanoid(),
+        userId,
+        endpoint,
+        p256dh: keys.p256dh,
+        auth: keys.auth,
+        expirationTime: subscription.expirationTime ? new Date(subscription.expirationTime) : null,
+        createdAt: new Date(),
+        updatedAt: new Date(),
+      })
+    }
 
     console.log('User subscribed')
 
@@ -37,8 +72,9 @@ export async function subscribeUser(subscription: WebPushSubscription) {
 
 export async function unsubscribeUser(endpoint: string) {
   try {
-    subscriptions.delete(endpoint)
-    console.log('User unsubscribed:', endpoint)
+    await db.delete(pushSubscription).where(eq(pushSubscription.endpoint, endpoint))
+
+    console.log('User unsubscribed')
 
     return { success: true, message: 'Unsubscribed successfully' }
   } catch (error) {
@@ -47,7 +83,7 @@ export async function unsubscribeUser(endpoint: string) {
   }
 }
 
-export async function sendNotification(message: string) {
+export async function sendNotification(message: string, targetUserId?: string) {
   try {
     const payload = JSON.stringify({
       title: 'Jamaica Traffic Dashboard',
@@ -56,19 +92,34 @@ export async function sendNotification(message: string) {
       badge: '/icons/badge.png',
     })
 
+    // Fetch subscriptions from database
+    const subscriptionsQuery = targetUserId
+      ? db.select().from(pushSubscription).where(eq(pushSubscription.userId, targetUserId))
+      : db.select().from(pushSubscription)
+
+    const subscriptions = await subscriptionsQuery
+
     // Send to all subscribed users
     const promises: Promise<unknown>[] = []
-    const initialCount = subscriptions.size
+    const initialCount = subscriptions.length
 
-    subscriptions.forEach((subscription) => {
+    for (const sub of subscriptions) {
+      const webPushSubscription: WebPushSubscription = {
+        endpoint: sub.endpoint,
+        keys: {
+          p256dh: sub.p256dh,
+          auth: sub.auth,
+        },
+      }
+
       promises.push(
-        webpush.sendNotification(subscription, payload).catch((error) => {
+        webpush.sendNotification(webPushSubscription, payload).catch(async (error) => {
           console.error('Error sending notification:', error)
-          // Remove failed subscription
-          subscriptions.delete(subscription.endpoint)
+          // Remove failed subscription from database
+          await db.delete(pushSubscription).where(eq(pushSubscription.id, sub.id))
         })
       )
-    })
+    }
 
     await Promise.all(promises)
 
@@ -83,5 +134,11 @@ export async function sendNotification(message: string) {
 }
 
 export async function getSubscriptionCount() {
-  return subscriptions.size
+  try {
+    const count = await db.select().from(pushSubscription)
+    return count.length
+  } catch (error) {
+    console.error('Error getting subscription count:', error)
+    return 0
+  }
 }

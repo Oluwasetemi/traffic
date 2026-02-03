@@ -4,8 +4,10 @@ import { useState, useEffect } from 'react'
 import { subscribeUser, unsubscribeUser, sendNotification } from '../../actions/push-notifications'
 import { Button } from '../button'
 import { BellIcon, BellSlashIcon } from '@heroicons/react/24/outline'
+import { useSession } from '../../lib/auth-client'
 
 export function PushNotificationManager() {
+  const { data: session } = useSession()
   const [isSupported, setIsSupported] = useState(false)
   const [subscription, setSubscription] = useState<PushSubscription | null>(null)
   const [isLoading, setIsLoading] = useState(false)
@@ -74,8 +76,15 @@ export function PushNotificationManager() {
 
       // Send subscription to server
       const subData = sub.toJSON()
+      
+      if (!session?.user?.id) {
+        setMessage('You must be logged in to enable notifications')
+        setIsLoading(false)
+        return
+      }
+      
       // eslint-disable-next-line @typescript-eslint/no-explicit-any
-      const result = await subscribeUser(subData as any)
+      const result = await subscribeUser(subData as any, session.user.id)
 
       if (result.success) {
         setSubscription(sub)

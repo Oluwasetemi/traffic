@@ -55,3 +55,16 @@ export const rateLimit = pgTable('rateLimit', {
   count: integer('count').notNull().default(0),
   lastRequest: timestamp('lastRequest').notNull(),
 })
+
+export const pushSubscription = pgTable('pushSubscription', {
+  id: text('id').primaryKey(),
+  userId: text('userId')
+    .notNull()
+    .references(() => user.id, { onDelete: 'cascade' }),
+  endpoint: text('endpoint').notNull().unique(),
+  p256dh: text('p256dh').notNull(),
+  auth: text('auth').notNull(),
+  expirationTime: timestamp('expirationTime'),
+  createdAt: timestamp('createdAt').notNull().defaultNow(),
+  updatedAt: timestamp('updatedAt').notNull().defaultNow(),
+})

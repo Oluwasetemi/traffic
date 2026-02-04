@@ -3,7 +3,7 @@
 import webpush, { PushSubscription as WebPushSubscription } from 'web-push'
 import { db } from '../lib/db'
 import { pushSubscription } from '../lib/db/schema'
-import { eq } from 'drizzle-orm'
+import { eq, count } from 'drizzle-orm'
 import { nanoid } from 'nanoid'
 
 const publicKey = process.env.NEXT_PUBLIC_VAPID_PUBLIC_KEY
@@ -137,8 +137,8 @@ export async function sendNotification(message: string, targetUserId?: string) {
 
 export async function getSubscriptionCount() {
   try {
-    const count = await db.select().from(pushSubscription)
-    return count.length
+    const [{ value }] = await db.select({ value: count() }).from(pushSubscription)
+    return Number(value ?? 0)
   } catch (error) {
     console.error('Error getting subscription count:', error)
     return 0

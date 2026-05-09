@@ -37,13 +37,7 @@ export default function DashboardPage() {
   const [isRealData, setIsRealData] = useState(false)
   const dashboardRef = useRef<HTMLDivElement>(null)
 
-  useEffect(() => {
-    if (!sessionPending && session) {
-      fetchTickets()
-    }
-  }, [sessionPending, session])
-
-  const fetchTickets = async () => {
+  const fetchTickets = useCallback(async () => {
     setIsLoading(true)
     try {
       // First, check if we have ticket data from the lookup flow
@@ -79,7 +73,13 @@ export default function DashboardPage() {
     } finally {
       setIsLoading(false)
     }
-  }
+  }, [])
+
+  useEffect(() => {
+    if (!sessionPending && session) {
+      fetchTickets()
+    }
+  }, [sessionPending, session, fetchTickets])
 
   // Memoize filtered tickets to prevent recalculation on every render
   const filteredTickets = useMemo(() =>

@@ -1,6 +1,7 @@
 'use client'
 
-import { useState } from 'react'
+import { useState, Suspense } from 'react'
+import { useSearchParams } from 'next/navigation'
 import { Link } from '../components/link'
 import { Button } from '../components/button'
 import { AuthLayout } from '../components/auth-layout'
@@ -9,7 +10,10 @@ import { Text } from '../components/text'
 import { GoogleIcon } from '../login/page'
 import { signIn } from '../lib/auth-client'
 
-export default function RegisterPage() {
+function RegisterForm() {
+  const searchParams = useSearchParams()
+  const raw = searchParams.get('redirect') || '/lookup'
+  const redirectTo = raw.startsWith('/') && !raw.startsWith('//') ? raw : '/lookup'
   const [isLoading, setIsLoading] = useState(false)
   const [error, setError] = useState<string | null>(null)
 
@@ -20,7 +24,7 @@ export default function RegisterPage() {
     try {
       const result = await signIn.social({
         provider: 'google',
-        callbackURL: '/lookup',
+        callbackURL: redirectTo,
       })
 
       // If redirect is false, the flow failed and no redirect will occur
@@ -86,5 +90,13 @@ export default function RegisterPage() {
         </div>
       </div>
     </AuthLayout>
+  )
+}
+
+export default function RegisterPage() {
+  return (
+    <Suspense fallback={null}>
+      <RegisterForm />
+    </Suspense>
   )
 }

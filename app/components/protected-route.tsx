@@ -1,18 +1,20 @@
 'use client'
 
 import { useEffect } from 'react'
+import { usePathname } from 'next/navigation'
 import { useTransitionRouter } from 'next-view-transitions'
 import { useSession } from '../lib/auth-client'
 
 export function ProtectedRoute({ children }: { children: React.ReactNode }) {
   const { data: session, isPending } = useSession()
   const router = useTransitionRouter()
+  const pathname = usePathname()
 
   useEffect(() => {
     if (!isPending && !session) {
-      router.push('/login')
+      router.push(`/login?redirect=${encodeURIComponent(pathname)}`)
     }
-  }, [session, isPending, router])
+  }, [session, isPending, router, pathname])
 
   if (isPending) {
     return (

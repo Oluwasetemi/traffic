@@ -2,6 +2,7 @@
 
 import { useEffect, useState, useMemo, useCallback, useRef } from 'react'
 import { ProtectedRoute } from '../components/protected-route'
+import { useSession } from '../lib/auth-client'
 import { Badge } from '../components/badge'
 import {
   Table,
@@ -29,17 +30,14 @@ import { InstallPrompt } from '../components/pwa/install-prompt'
 import { ShareButton } from '../components/dashboard/share-dashboard'
 
 export default function DashboardPage() {
+  const { data: session, isPending: sessionPending } = useSession()
   const [data, setData] = useState<TicketSearchResponse | null>(null)
   const [isLoading, setIsLoading] = useState(true)
   const [filter, setFilter] = useState<'all' | 'outstanding' | 'paid'>('all')
   const [isRealData, setIsRealData] = useState(false)
   const dashboardRef = useRef<HTMLDivElement>(null)
 
-  useEffect(() => {
-    fetchTickets()
-  }, [])
-
-  const fetchTickets = async () => {
+  const fetchTickets = useCallback(async () => {
     setIsLoading(true)
     try {
       // First, check if we have ticket data from the lookup flow
@@ -75,7 +73,13 @@ export default function DashboardPage() {
     } finally {
       setIsLoading(false)
     }
-  }
+  }, [])
+
+  useEffect(() => {
+    if (!sessionPending && session) {
+      fetchTickets()
+    }
+  }, [sessionPending, session, fetchTickets])
 
   // Memoize filtered tickets to prevent recalculation on every render
   const filteredTickets = useMemo(() =>
@@ -117,19 +121,16 @@ export default function DashboardPage() {
     })
   }, [])
 
-  if (isLoading) {
-    return (
-      <div className="min-h-screen flex items-center justify-center" role="status" aria-live="polite">
-        <div className="text-center">
-          <div className="inline-block size-12 animate-spin motion-reduce:animate-none rounded-full border-4 border-solid border-blue-600 border-r-transparent"></div>
-          <p className="mt-4 text-zinc-600 dark:text-zinc-400">Loading tickets...</p>
-        </div>
-      </div>
-    )
-  }
-
   return (
     <ProtectedRoute>
+      {isLoading ? (
+        <div className="min-h-screen flex items-center justify-center" role="status" aria-live="polite">
+          <div className="text-center">
+            <div className="inline-block size-12 animate-spin motion-reduce:animate-none rounded-full border-4 border-solid border-blue-600 border-r-transparent"></div>
+            <p className="mt-4 text-zinc-600 dark:text-zinc-400">Loading tickets...</p>
+          </div>
+        </div>
+      ) : (
       <div className="relative min-h-screen">
         {/* Grid Pattern Background */}
         <div className="absolute inset-0 bg-grid-pattern -z-10" />
@@ -430,6 +431,7 @@ export default function DashboardPage() {
       <InstallPrompt />
       <ShareButton dashboardRef={dashboardRef} data={data} />
       </div>
+      )}
     </ProtectedRoute>
   )
 }
